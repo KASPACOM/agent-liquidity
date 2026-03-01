@@ -1,6 +1,5 @@
 import { ethers } from 'ethers';
 import { PairState } from './monitor';
-import { CONFIG } from './config';
 
 export interface RebalanceAction {
   type: 'add_liquidity' | 'remove_liquidity' | 'swap' | 'none';
@@ -18,7 +17,7 @@ export class Rebalancer {
    */
   evaluate(state: PairState, vaultBalances: { token0: bigint; token1: bigint }): RebalanceAction {
     const { reserve0, reserve1 } = state;
-    
+
     // Check if reserves are critically low (thin liquidity)
     const minReserve = BigInt(ethers.parseEther('1').toString()); // 1 token minimum
     if (reserve0 < minReserve || reserve1 < minReserve) {
@@ -37,13 +36,13 @@ export class Rebalancer {
         };
       }
     }
-    
+
     // Check inventory balance — are we too heavy on one side?
     if (vaultBalances.token0 > 0n || vaultBalances.token1 > 0n) {
       const total = Number(vaultBalances.token0) + Number(vaultBalances.token1) * state.price1in0;
       if (total > 0) {
         const ratio0 = Number(vaultBalances.token0) / total;
-        
+
         // If more than 60% in one token, swap to rebalance
         if (ratio0 > 0.6) {
           const excessAmount = vaultBalances.token0 / 10n; // Swap 10% of excess
@@ -69,7 +68,7 @@ export class Rebalancer {
             reason: `Token1 overweight (${((1 - ratio0) * 100).toFixed(1)}%), rebalancing`,
           };
         }
-        
+
         // If balanced, add liquidity to deepen the pool
         if (vaultBalances.token0 > minReserve && vaultBalances.token1 > minReserve) {
           return {
@@ -84,7 +83,7 @@ export class Rebalancer {
         }
       }
     }
-    
+
     return {
       type: 'none',
       pair: state.pairAddress,
