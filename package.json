@@ -1,0 +1,24 @@
+{
+  "name": "@kaspacom/agent-liquidity",
+  "version": "0.1.0",
+  "description": "AI Agent Liquidity Manager for KaspaCom DEX",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0"
+  },
+  "keywords": ["kaspacom", "dex", "liquidity", "agent", "ai"],
+  "author": "KaspaCom",
+  "license": "MIT"
+}
