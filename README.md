@@ -1,86 +1,172 @@
 # Agent Liquidity Manager
 
-AI-powered liquidity management agent for KaspaCom DEX. Autonomously monitors pools, rebalances inventory, and provides liquidity to optimize market depth and reduce slippage.
+AI Agent Liquidity Manager for KaspaCom DEX on IGRA (EVM L2 for Kaspa).
 
 ## Overview
 
-This agent runs 24/7 and:
-- **Monitors** DEX pair states (reserves, prices, liquidity depth)
-- **Rebalances** vault inventory when token holdings become unbalanced
-- **Adds liquidity** to pools when liquidity is thin or inventory is balanced
-- **Swaps** tokens to maintain optimal inventory ratios
+This service monitors token pairs on the KaspaCom DEX (Uniswap V2 fork) and autonomously executes liquidity management operations via the AgentVault contract.
 
-All operations execute through the **AgentVault** contract, which enforces:
-- Daily volume limits (risk management)
-- Approved token whitelist
-- Emergency stop functionality
-- Multi-sig governance
+**Key Features:**
+- 🎯 **GOAT SDK Integration** — Plugin-based DEX interaction with type-safe tools
+- 📊 **Pair Monitoring** — Real-time tracking of reserves, prices, and vault balances
+- 🔄 **Auto-Rebalancing** — Evaluates market conditions and executes swaps/liquidity adds
+- 🔐 **Vault-Managed** — All operations routed through AgentVault for safety and volume limits
 
 ## Architecture
 
 ```
-src/
-  config.ts       - Network config, contract addresses, agent parameters
-  monitor.ts      - PriceMonitor: reads on-chain pair state
-  rebalancer.ts   - Rebalancer: evaluates state and decides actions
-  index.ts        - Main loop: cycle → monitor → evaluate → execute
+┌─────────────────────────────────────────┐
+│   Agent Liquidity Manager (this repo)  │
+│  ┌────────────────────────────────────┐ │
+│  │  PriceMonitor (DEX state reader)  │ │
+│  └────────────────────────────────────┘ │
+│  ┌────────────────────────────────────┐ │
+│  │  Rebalancer (decision logic)      │ │
+│  └────────────────────────────────────┘ │
+│  ┌────────────────────────────────────┐ │
+│  │  GOAT SDK + KaspaCom DEX Plugin   │ │
+│  │  ┌──────────────────────────────┐ │ │
+│  │  │  swap                        │ │ │
+│  │  │  addLiquidity                │ │ │
+│  │  │  removeLiquidity             │ │ │
+│  │  │  getQuote                    │ │ │
+│  │  │  getPairReserves             │ │ │
+│  │  │  getTokenBalance             │ │ │
+│  │  └──────────────────────────────┘ │ │
+│  └────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────┐
+│      AgentVault (on-chain contract)     │
+│  ┌────────────────────────────────────┐ │
+│  │  swap()                            │ │
+│  │  addLiquidity()                    │ │
+│  │  removeLiquidity()                 │ │
+│  │  (with daily volume limits)        │ │
+│  └────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+           ↓
+┌─────────────────────────────────────────┐
+│    KaspaCom DEX (Uniswap V2 fork)       │
+│  ┌────────────────────────────────────┐ │
+│  │  Router                            │ │
+│  │  Factory                           │ │
+│  │  Pairs                             │ │
+│  └────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
 ```
 
-## Running
+## GOAT SDK Plugin
 
-### Prerequisites
-- Node.js 20+
-- Private key for agent wallet with vault permissions
-- `.env` file (see `.env.example`)
+The `src/plugins/kaspacom-dex/` plugin provides a clean interface to the DEX:
 
-### Local Development
+**Files:**
+- `kaspacom-dex.plugin.ts` — Plugin class, chain support
+- `kaspacom-dex.service.ts` — Tools decorated with `@Tool` for AI agent interaction
+- `parameters.ts` — Zod schemas for all tool parameters
+- `types.ts` — TypeScript types
+- `abi/` — Contract ABIs (Router, Factory, Pair, ERC20, Vault)
+
+**Tools:**
+- `swap` — Swap tokens via Router or Vault
+- `addLiquidity` — Add liquidity to a pair
+- `removeLiquidity` — Remove liquidity from a pair
+- `getQuote` — Get swap quote without executing
+- `getPairReserves` — Read current reserves
+- `getTokenBalance` — Check ERC20 balance
+- `getPairs` — List all pairs from Factory
+
+**Usage:**
+```typescript
+import { kaspaComDex } from './plugins/kaspacom-dex';
+import { ViemEVMWalletClient } from '@goat-sdk/wallet-viem';
+
+const wallet = new ViemEVMWalletClient(viemClient);
+const dexPlugin = kaspaComDex({
+  chainId: 38836,
+  vaultAddress: '0x7edf75ceB2441d80aBC6599CeB4E62Eeb23BB2a9',
+});
+```
+
+## Installation
+
 ```bash
 npm install
-npm run dev     # Watch mode with auto-reload
 ```
 
-### Production
-```bash
-npm start       # Run agent
-```
-
-### Docker
-```bash
-docker build -t agent-liquidity .
-docker run --env-file .env agent-liquidity
-```
+**Dependencies:**
+- `@goat-sdk/core` — GOAT SDK core
+- `@goat-sdk/wallet-evm` — EVM wallet interface
+- `@goat-sdk/wallet-viem` — Viem wallet adapter
+- `viem@2.23.4` — Ethereum library (pinned for GOAT compatibility)
+- `ethers` — Alternate Ethereum library (used by legacy code)
 
 ## Configuration
 
-See `src/config.ts` for:
-- Network settings (RPC, chain ID)
-- Contract addresses (vault, router, factory)
-- Agent behavior (check interval, slippage, rebalance threshold)
-- Risk limits (max trade size, daily volume cap)
+Set in `src/config.ts` or via environment variables:
 
-## Security & OPSEC
+```bash
+# Network
+IGRA_RPC_URL=https://galleon-testnet.igralabs.com:8545
 
-⚠️ **NEVER commit `.env` or log private keys!**
+# Contracts
+VAULT_ADDRESS=0x7edf75ceB2441d80aBC6599CeB4E62Eeb23BB2a9
+DEX_ROUTER=0x81Cc4e7DbC652ec9168Bc2F4435C02d7F315148e
+DEX_FACTORY=0x89d5842017ceA7dd18D10EE6c679cE199d2aD99E
 
-The agent wallet private key is loaded from `process.env.DEPLOYER_PRIVATE_KEY` at runtime only. It is:
-- Never logged, printed, or written to files
-- Only referenced by variable name in code
-- Protected by `.gitignore` (`.env` excluded from repo)
+# Private key (OPSEC: never commit)
+DEPLOYER_PRIVATE_KEY=0x...
+```
 
-Best practices:
-- Use a dedicated wallet for the agent (not your main deployer wallet)
-- Fund only with necessary amounts for daily operations
-- Monitor vault balances and transactions
-- Keep `.env` with `chmod 600` permissions
+**Supported Chains (in plugin):**
+- Kasplex Testnet (167012)
+- IGRA Galleon Testnet (38836)
+- _(Kasplex Mainnet, Galleon Mainnet — add when deployed)_
 
-## Deployment
+## Running
 
-Currently runs on:
-- **Network:** IGRA Galleon Testnet (Chain ID 38836)
-- **RPC:** `https://galleon-testnet.igralabs.com:8545`
-- **Vault:** `0x7edf75ceB2441d80aBC6599CeB4E62Eeb23BB2a9`
+```bash
+# Start with GOAT plugin (default)
+npm start
 
-For production deployment, update `config.ts` with mainnet addresses.
+# Start legacy mode (raw ethers.js)
+npm run start:legacy
+
+# Development mode (watch)
+npm run dev
+```
+
+## Contract Addresses
+
+**IGRA Galleon Testnet (Chain ID: 38836):**
+- Router: `0x81Cc4e7DbC652ec9168Bc2F4435C02d7F315148e`
+- Factory: `0x89d5842017ceA7dd18D10EE6c679cE199d2aD99E`
+- WKAS: `0xf40178040278E16c8813dB20a84119A605812FB3`
+- AgentVault: `0x7edf75ceB2441d80aBC6599CeB4E62Eeb23BB2a9`
+
+**Kasplex Testnet (Chain ID: 167012):**
+- Router: `0x81Cc4e7DbC652ec9168Bc2F4435C02d7F315148e`
+- Factory: `0x89d5842017ceA7dd18D10EE6c679cE199d2aD99E`
+- WKAS: `0xf40178040278E16c8813dB20a84119A605812FB3`
+- AgentVault: `0x7edf75ceB2441d80aBC6599CeB4E62Eeb23BB2a9`
+
+## Development
+
+**Build:**
+```bash
+npm run build
+```
+
+**Type Check:**
+```bash
+npx tsc --noEmit
+```
+
+## Security
+
+- **Private keys** are loaded from `DEPLOYER_PRIVATE_KEY` at runtime only (never logged or persisted)
+- **All operations** go through AgentVault which enforces daily volume limits
+- **Vault owner** controls the agent wallet address
 
 ## License
 
