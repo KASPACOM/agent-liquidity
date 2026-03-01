@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-liquidity
+  namespace: kaspa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-liquidity
+      environment: develop
+  template:
+    metadata:
+      labels:
+        app: agent-liquidity
+        environment: develop
+    spec:
+      serviceAccount: agent-liquidity
+      containers:
+      - name: agent-liquidity
+        image: 009160070963.dkr.ecr.eu-central-1.amazonaws.com/kaspacom/agent-liquidity-dev:latest
+        ports:
+        - containerPort: 3003
+        envFrom:
+        - configMapRef:
+            name: agent-liquidity
+        # - secretRef:
+        #     name: agent-liquidity
+        # resources:
+        #   requests:
+        #     cpu: 1m
+        #     memory: 80M
+        #   limits:
+        #     cpu: 20m
+        #     memory: 300M
+        # startupProbe:
+        #   failureThreshold: 60
+        #   httpGet:
+        #     path: /health
+        #     port: 3003
+        #     scheme: HTTP
+        #   periodSeconds: 5
+        #   successThreshold: 1
+        #   timeoutSeconds: 3
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 3003
+        #   periodSeconds: 15
+        #   timeoutSeconds: 2
+        #   failureThreshold: 3
+      nodeSelector:
+        node-group: kaspa-app
+      tolerations:
+        - key: "node-group"
+          operator: "Equal"
+          value: "kaspa-app"
+          effect: "NoSchedule"

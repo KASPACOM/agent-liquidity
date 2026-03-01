@@ -1,0 +1,73 @@
+name: Build Docker Image and Push to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ECR_REPO_URI: 009160070963.dkr.ecr.us-east-1.amazonaws.com/kaspacom/agent-liquidity-prod
+  AWS_REGION: us-east-1
+
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Log in to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Set up SSH agent
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: |
+        DOCKER_BUILDKIT=1 docker build --ssh default -t ${{ env.ECR_REPO_URI }}:latest .
+
+    - name: Tag Docker image
+      run: |
+        docker tag ${{ env.ECR_REPO_URI }}:latest ${{ env.ECR_REPO_URI }}:${{ github.sha }}
+
+    - name: Push Docker image to ECR
+      run: |
+        docker push ${{ env.ECR_REPO_URI }}:latest
+        docker push ${{ env.ECR_REPO_URI }}:${{ github.sha }}
+
+    - name: Generate token
+      id: generate-token
+      uses: actions/create-github-app-token@v1
+      with:
+        owner: 'KASPACOM'
+        repositories: 'argo-cd'
+        app-id: ${{ secrets.ARGO_GH_APP_ID }}
+        private-key: ${{ secrets.ARGO_GH_APP_PRIVATE_KEY }}
+
+    - name: Checkout ArgoCD repository
+      uses: actions/checkout@v3
+      with:
+        repository: KASPACOM/argo-cd
+        token: ${{ steps.generate-token.outputs.token }}
+
+    - name: Update image tag in ArgoCD repository
+      run: |
+        sed -i 's|image: ${{ env.ECR_REPO_URI }}:.*|image: ${{ env.ECR_REPO_URI }}:${{ github.sha }}|' prod/prod-a-ue1-cluster/kaspa-agent-liquidity/deployment.yaml
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add .
+        git commit -m "Update agent-liquidity image to ${{ github.sha }}"
+        git push

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-liquidity
+  namespace: kaspa
+data:
+  KASPLEX_GRAPH_NODE_URL: "https://api.thegraph.com/subgraphs/name/kasplex/kasplex"
+  DEX_ROUTER: "0x1234567890abcdef1234567890abcdef12345678"
+  DEX_FACTORY: "0xabcdef1234567890abcdef1234567890abcdef12"
+  WKAS: "0x7890abcdef1234567890abcdef1234567890abcd"
+  VAULT_ADDRESS: "0xef1234567890abcdef1234567890abcdef123456"
+  API_BASE_URL: "https://api.kaspacom.com"
