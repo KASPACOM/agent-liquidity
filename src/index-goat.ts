@@ -9,7 +9,7 @@ import { kaspaComDex } from './plugins/kaspacom-dex';
 // Define custom chain for IGRA Galleon Testnet
 const galleonTestnet = {
   id: CONFIG.chainId,
-  name: 'IGRA Galleon Testnet',
+  name: 'Kasplex Testnet',
   network: 'galleon-testnet',
   nativeCurrency: {
     decimals: 18,
@@ -21,7 +21,7 @@ const galleonTestnet = {
     public: { http: [CONFIG.rpcUrl] },
   },
   blockExplorers: {
-    default: { name: 'Explorer', url: 'https://explorer.galleon-testnet.igralabs.com' },
+    default: { name: 'Explorer', url: 'https://explorer.testnet.kasplextest.xyz' },
   },
 } as const;
 
@@ -61,7 +61,7 @@ class AgentLiquidityManager {
       routerAddress: CONFIG.routerAddress as `0x${string}`,
       factoryAddress: CONFIG.factoryAddress as `0x${string}`,
       wkasAddress: CONFIG.wkasAddress as `0x${string}`,
-      chainName: 'IGRA Galleon Testnet',
+      chainName: 'Kasplex Testnet',
     });
     
     console.log('✅ GOAT SDK initialized with KaspaCom DEX plugin');

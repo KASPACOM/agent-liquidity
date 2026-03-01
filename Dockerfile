@@ -1,22 +1,15 @@
-FROM node:20-alpine
-
+FROM node:20-alpine AS builder
 WORKDIR /app
-
-# Install dependencies
 COPY package*.json ./
-RUN npm ci --only=production
-
-# Copy source and build config
+RUN npm ci
 COPY src/ ./src/
 COPY tsconfig.json ./
+RUN npx tsc
 
-# Build TypeScript
-RUN npm install -g typescript && \
-    tsc && \
-    npm uninstall -g typescript
-
-# Expose port
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY --from=builder /app/dist ./dist
 EXPOSE 3003
-
-# Run
-CMD ["npm", "start"]
+CMD ["node", "dist/index-goat.js"]

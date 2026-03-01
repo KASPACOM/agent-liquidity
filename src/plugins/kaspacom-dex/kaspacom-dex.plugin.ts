@@ -18,10 +18,9 @@ const CHAIN_CONFIGS: Record<number, ChainConfig> = {
   38836: {
     chainId: 38836,
     chainName: "IGRA Galleon Testnet",
-    routerAddress: "0x81Cc4e7DbC652ec9168Bc2F4435C02d7F315148e",
-    factoryAddress: "0x89d5842017ceA7dd18D10EE6c679cE199d2aD99E",
-    wkasAddress: "0xf40178040278E16c8813dB20a84119A605812FB3",
-    vaultAddress: "0x7edf75ceB2441d80aBC6599CeB4E62Eeb23BB2a9",
+    routerAddress: "0xC69B228c4591508067c87bf78743080eE1270e2A",
+    factoryAddress: "0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0",
+    wkasAddress: "0x394C68684F9AFCEb9b804531EF07a864E8081738",
   },
   // Add Kasplex Mainnet and Galleon Mainnet when deployed
 };
