@@ -1,4 +1,4 @@
-import { getAddress } from 'viem';
+import { getAddress, type PublicClient, type WalletClient } from 'viem';
 import { CONFIG, type ChainConfig, type PairConfig } from '../../config';
 import { PAIR_ABI } from '../../plugins/kaspacom-dex/abi/pair';
 import { VAULT_ABI } from '../../plugins/kaspacom-dex/abi/vault';
@@ -12,13 +12,33 @@ interface PairApiRecord {
   dailyVolume: number;
 }
 
+type VaultWriteRequest =
+  | {
+      functionName: 'addLiquidity';
+      args: readonly [`0x${string}`, `0x${string}`, bigint, bigint, bigint, bigint, bigint];
+    }
+  | {
+      functionName: 'removeLiquidity';
+      args: readonly [`0x${string}`, `0x${string}`, bigint, bigint, bigint, bigint];
+    }
+  | {
+      functionName: 'swap';
+      args: readonly [bigint, bigint, readonly `0x${string}`[], bigint];
+    };
+
+type DexClient = Pick<WalletClient, 'writeContract'> &
+  Pick<PublicClient, 'readContract' | 'waitForTransactionReceipt'> & {
+    account: NonNullable<WalletClient['account']>;
+    chain: NonNullable<WalletClient['chain']>;
+  };
+
 export class DexStrategyEngine {
   private readonly positionStore = new PositionStore();
   private readonly smartLp = new SmartLPManager(this.positionStore);
   private readonly arbitrage = new ArbitrageEngine();
 
   constructor(
-    private readonly client: any,
+    private readonly client: DexClient,
     private readonly chain: ChainConfig
   ) {}
 
@@ -176,12 +196,12 @@ export class DexStrategyEngine {
         throw new Error(`HTTP ${response.status}`);
       }
 
-      const body = (await response.json()) as any;
-      const rawPairs: any[] = Array.isArray(body)
+      const body = (await response.json()) as unknown;
+      const rawPairs: Record<string, unknown>[] = Array.isArray(body)
         ? body
-        : Array.isArray(body?.pairs)
+        : this.hasArrayField(body, 'pairs')
           ? body.pairs
-          : Array.isArray(body?.data)
+          : this.hasArrayField(body, 'data')
             ? body.data
             : [];
 
@@ -244,6 +264,17 @@ export class DexStrategyEngine {
       pairName,
       dailyVolume,
     };
+  }
+
+  private hasArrayField<T extends string>(
+    value: unknown,
+    key: T
+  ): value is Record<T, Record<string, unknown>[]> {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      Array.isArray((value as Record<string, unknown>)[key])
+    );
   }
 
   private pickString(
@@ -320,15 +351,18 @@ export class DexStrategyEngine {
     amountA: bigint,
     amountB: bigint
   ): Promise<void> {
-    await this.writeVaultContract('addLiquidity', [
-      pair.token0,
-      pair.token1,
-      amountA,
-      amountB,
-      this.applySlippage(amountA),
-      this.applySlippage(amountB),
-      this.deadline(),
-    ]);
+    await this.writeVaultContract({
+      functionName: 'addLiquidity',
+      args: [
+        pair.token0,
+        pair.token1,
+        amountA,
+        amountB,
+        this.applySlippage(amountA),
+        this.applySlippage(amountB),
+        this.deadline(),
+      ],
+    });
   }
 
   private async executeRemoveLiquidity(pairAddress: string, liquidity: bigint): Promise<void> {
@@ -339,14 +373,17 @@ export class DexStrategyEngine {
       throw new Error(`Missing pair config for ${pairAddress}`);
     }
 
-    await this.writeVaultContract('removeLiquidity', [
-      getAddress(pair.tokenA) as `0x${string}`,
-      getAddress(pair.tokenB) as `0x${string}`,
-      liquidity,
-      0n,
-      0n,
-      this.deadline(),
-    ]);
+    await this.writeVaultContract({
+      functionName: 'removeLiquidity',
+      args: [
+        getAddress(pair.tokenA) as `0x${string}`,
+        getAddress(pair.tokenB) as `0x${string}`,
+        liquidity,
+        0n,
+        0n,
+        this.deadline(),
+      ],
+    });
   }
 
   private async executeSwap(
@@ -355,23 +392,43 @@ export class DexStrategyEngine {
     amountIn: bigint,
     expectedOut: bigint
   ): Promise<void> {
-    await this.writeVaultContract('swap', [
-      amountIn,
-      this.applySlippage(expectedOut),
-      [tokenIn, tokenOut],
-      this.deadline(),
-    ]);
+    await this.writeVaultContract({
+      functionName: 'swap',
+      args: [
+        amountIn,
+        this.applySlippage(expectedOut),
+        [tokenIn, tokenOut],
+        this.deadline(),
+      ],
+    });
   }
 
-  private async writeVaultContract(functionName: string, args: readonly unknown[]): Promise<void> {
-    const hash = await this.client.writeContract({
+  private async writeVaultContract(request: VaultWriteRequest): Promise<void> {
+    const baseRequest = {
       address: getAddress(this.chain.vaultAddress!) as `0x${string}`,
       abi: VAULT_ABI,
-      functionName,
-      args,
       chain: this.client.chain,
       account: this.client.account,
-    });
+    } as const;
+
+    const hash =
+      request.functionName === 'addLiquidity'
+        ? await this.client.writeContract({
+            ...baseRequest,
+            functionName: 'addLiquidity',
+            args: request.args,
+          })
+        : request.functionName === 'removeLiquidity'
+          ? await this.client.writeContract({
+              ...baseRequest,
+              functionName: 'removeLiquidity',
+              args: request.args,
+            })
+          : await this.client.writeContract({
+              ...baseRequest,
+              functionName: 'swap',
+              args: request.args,
+            });
 
     await this.client.waitForTransactionReceipt({
       hash,
@@ -387,4 +444,3 @@ export class DexStrategyEngine {
     return BigInt(Math.floor(Date.now() / 1000) + 600);
   }
 }
-

@@ -1,3 +1,6 @@
+/**
+ * @deprecated Use DexStrategyEngine instead.
+ */
 import { ethers } from 'ethers';
 import { PairState } from './monitor';
 
@@ -12,6 +15,10 @@ export interface RebalanceAction {
 }
 
 export class Rebalancer {
+  constructor() {
+    console.warn('Rebalancer is deprecated. Use DexStrategyEngine instead.');
+  }
+
   /**
    * Analyze a pair and decide what action to take
    */
