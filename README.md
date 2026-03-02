@@ -16,42 +16,53 @@ All operations routed through an on-chain AgentVault contract with risk limits.
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                     Agent Liquidity Manager                              │
 │                                                                          │
-│  ┌──────────────┐   ┌────────────┐   ┌─────────────────────────────┐  │
-│  │ DEX Monitor  │──▶│ Rebalancer │──▶│ GOAT SDK Plugin             │  │
-│  │              │   │ (Strategy) │   │ (KaspaCom DEX)              │  │
-│  └──────┬───────┘   └────────────┘   └────────┬────────────────────┘  │
-│         │                                      │                        │
-│  ┌──────▼──────────────────────┐              │                        │
-│  │ Liquidation Monitor         │              │                        │
-│  │ (IGRA only — Aave V3)       │              │                        │
-│  └──────┬──────────────────────┘              │                        │
-│         │                                      │                        │
-│  Reads pair data + positions           Executes trades/liquidations    │
-│  from Graph Nodes or API               through AgentVault              │
-└─────────┼────────────────────────────────────┼─────────────────────────┘
-          │                                      │
-          ▼                                      ▼
-┌──────────────────────┐            ┌────────────────────────┐
-│ Graph Nodes (k8s)    │            │  AgentVault.sol         │
-│ - IGRA subgraphs     │            │  (on-chain)             │
-│ - Kasplex subgraphs  │            │                         │
-│ - Aave subgraph      │            │ swap()                  │
-│                      │            │ addLiquidity()          │
-│ OR                   │            │ removeLiquidity()       │
-│                      │            │ liquidateAave() (IGRA)  │
-│ Public API           │            │                         │
-│ dev-api-defi         │            │ Risk limits:            │
-│ .kaspa.com           │            │ • 100 KAS/trade         │
-└──────────────────────┘            │ • 5,000 KAS/day         │
-                                     └────────┬───────────────┘
-                                              │
-                         ┌────────────────────┴────────────────────┐
-                         ▼                                         ▼
-                ┌─────────────────┐                    ┌──────────────────┐
-                │ KaspaCom DEX     │                    │ Aave V3 Pool     │
-                │ (Uni V2 Router)  │                    │ (IGRA only)      │
-                │ 100+ active pairs│                    │ Liquidations     │
-                └─────────────────┘                    └──────────────────┘
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │ DEX Strategy Engine (src/modules/dex/strategy.ts)               │   │
+│  │                                                                  │   │
+│  │  1. Load pair snapshots (reserves, LP balances, vault balances) │   │
+│  │  2. Fetch volume data from KaspaCom API                         │   │
+│  │  3. Check cross-pool arb (spread > 2%? → execute)              │   │
+│  │  4. Smart LP evaluation per pair:                               │   │
+│  │     • IL calc: 2*sqrt(r)/(1+r) - 1                             │   │
+│  │     • Fee APR: dailyVolume * 1% * poolShare * 365 / value      │   │
+│  │     • IL > fees? → EXIT  |  fees > IL? → ADD  |  else → HOLD  │   │
+│  │  5. Execute highest priority action via AgentVault              │   │
+│  └──────────────────────────────────────────┬──────────────────────┘   │
+│                                              │                          │
+│  ┌──────────────────────────────────────────┐│                          │
+│  │ Liquidation Module (IGRA only — Aave V3) ││                          │
+│  │ Monitors health factors, liquidates      ││                          │
+│  │ unhealthy positions directly from wallet ││                          │
+│  └──────────────────────────────────────────┘│                          │
+│                                              │                          │
+│  ┌──────────────────────────────────────────┐│                          │
+│  │ GOAT SDK Plugin (kaspacom-dex)           ││                          │
+│  │ 7 tools: swap, addLP, removeLP, quote,  ││                          │
+│  │ getPairReserves, getTokenBalance, getPairs│                          │
+│  └──────────────────────────────────────────┘│                          │
+└──────────────────────────────────────────────┼──────────────────────────┘
+                                               │
+          ┌────────────────────────────────────┼───────────────┐
+          ▼                                    ▼               ▼
+┌──────────────────────┐    ┌──────────────────────┐  ┌─────────────────┐
+│ KaspaCom API         │    │  AgentVault.sol       │  │ Aave V3 Pool    │
+│ dev-api-defi         │    │  (on-chain)           │  │ (IGRA only)     │
+│ .kaspa.com           │    │                       │  │                 │
+│                      │    │ swap()                │  │ liquidationCall │
+│ OR Graph Nodes (k8s) │    │ addLiquidity()        │  │ (direct wallet) │
+│ - IGRA subgraphs     │    │ removeLiquidity()     │  │                 │
+│ - Kasplex subgraphs  │    │                       │  └─────────────────┘
+│ - Aave subgraph      │    │ Risk limits:          │
+└──────────────────────┘    │ • 100 KAS/trade       │
+                            │ • 5,000 KAS/day       │
+                            └───────────┬───────────┘
+                                        │
+                               ┌────────▼────────┐
+                               │ KaspaCom DEX     │
+                               │ (Uni V2 Router)  │
+                               │ 100+ active pairs│
+                               │ 1% LP fee        │
+                               └─────────────────┘
 ```
 
 ---
@@ -148,12 +159,15 @@ TELEGRAM_CHAT_ID         # for alerts (future)
 
 | Contract | Address |
 |----------|---------|
+| **AgentVault** | `0x983E517e872301828d5d35aD646929beC41bD54c` |
 | DEX Router | `0xC69B228c4591508067c87bf78743080eE1270e2A` |
 | DEX Factory | `0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0` |
 | WKAS | `0x394C68684F9AFCEb9b804531EF07a864E8081738` |
 | Aave Pool | `0x631BC5c362ce203B6043844f93f2c67D23a87994` |
 | Aave Oracle | `0x6f10A47E2Df6138a36Bc785DA927Ea4072fd4c8f` |
 | Aave PoolDataProvider | `0x22B9bDEA931cE0b137DAEf80B2228a288ba05835` |
+
+> ⚠️ **Galleon requires `--legacy` flag for all transactions** (no EIP-1559). Gas price: 2000 gwei (2 twei).
 
 ### Galleon Mainnet (38837) — DEX + Aave
 
@@ -542,15 +556,45 @@ git push origin feature/test-pipeline
 
 ## Components
 
+### DEX Strategy Engine
+
 | Component | File | What It Does |
 |-----------|------|-------------|
-| **Config** | `src/config.ts` | Network, contract addresses, top 5 target pairs, risk params |
-| **DEX Monitor** | `src/monitor.ts` | Reads pair reserves + prices via Factory/Pair contracts or graph |
-| **Rebalancer** | `src/rebalancer.ts` | Decides what action to take: swap, add LP, remove LP, or nothing |
-| **Liquidation Monitor** | `src/liquidation-monitor.ts` | Monitors Aave positions for health factor < 1.0 (IGRA only) |
-| **Agent Loop** | `src/index-goat.ts` | Main loop — runs every 30s, checks all pairs/positions, executes actions |
-| **GOAT Plugin** | `src/plugins/kaspacom-dex/` | KaspaCom DEX plugin for GOAT SDK — 7 tools (swap, LP, quotes, balances) |
+| **Strategy Engine** | `src/modules/dex/strategy.ts` | Orchestrator — loads snapshots, runs arb + smart LP, executes via vault |
+| **Smart LP** | `src/modules/dex/smart-lp.ts` | Evaluates each LP: fee APR vs IL, decides add/remove/hold |
+| **Arbitrage** | `src/modules/dex/arbitrage.ts` | Detects same-chain cross-pool price mismatches (spread > 2%) |
+| **V2 Math** | `src/modules/dex/math.ts` | Swap amounts, IL calculation, LP value formulas |
+| **Position Store** | `src/modules/dex/positions.ts` | Persistent LP position tracking (`data/positions.json`) |
+| **Price Monitor** | `src/modules/dex/monitor.ts` | Reads pair reserves + prices via Factory/Pair contracts |
+| **Rebalancer** | `src/modules/dex/rebalancer.ts` | Legacy ratio rebalancer (kept for reference, not used) |
+
+### Liquidation Module (IGRA only)
+
+| Component | File | What It Does |
+|-----------|------|-------------|
+| **Strategy Manager** | `src/modules/liquidation/strategy.ts` | Orchestrates multi-chain liquidation scanning |
+| **Health Monitor** | `src/modules/liquidation/health-monitor.ts` | Tracks Aave position health factors |
+| **Liquidator** | `src/modules/liquidation/liquidator.ts` | Executes `liquidationCall()` directly from wallet |
+| **Price Monitor** | `src/modules/liquidation/price-monitor.ts` | Reads Aave oracle prices |
+
+### Other
+
+| Component | File | What It Does |
+|-----------|------|-------------|
+| **Config** | `src/config.ts` | Multi-chain config, contract addresses, top 5 pairs, risk limits |
+| **Agent Loop** | `src/index-goat.ts` | Main loop — every 30s runs DEX strategy + liquidation cycles |
+| **GOAT Plugin** | `src/plugins/kaspacom-dex/` | KaspaCom DEX plugin for GOAT SDK — 7 tools |
 | **Legacy Agent** | `src/index.ts` | Original ethers.js version (backup, not used in production) |
+
+### Decision Priority (each cycle)
+
+```
+1. Arbitrage     — spread > 2% between pools? Buy cheap, sell expensive (risk-free)
+2. Exit losers   — IL > accumulated fees? Remove LP to stop bleeding
+3. Add to winners — position profitable + high volume? Compound
+4. Enter new      — no position + high volume pair? Start LP
+5. Hold           — everything else, do nothing
+```
 
 ---
 
