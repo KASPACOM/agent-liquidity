@@ -23,6 +23,7 @@ const GAS_PRICE = 2_000_000_000_000n;
 const LEGACY_TX = {
   type: 'legacy' as const,
   gasPrice: GAS_PRICE,
+  gas: 500_000n,
 };
 const POOL_ADDRESS = '0xb265EA393A9297472628E21575AE5c7E6458A1F2' as const satisfies Address;
 const ORACLE_ADDRESS = '0x5B83681E48f365cfD2A4Ee29E2B699e38e04EbD9' as const satisfies Address;
