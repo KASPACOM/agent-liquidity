@@ -224,15 +224,14 @@ export class SmartLPManager {
   private estimateFeeApr(pair: PairSnapshot, dailyVolume: number, share: number): number {
     if (dailyVolume <= 0 || share <= 0) return 0;
 
-    const positionValue = this.getPositionValue(pair);
+    const positionValue = this.getPositionValue(pair, share);
     if (positionValue <= 0) return 0;
 
     const feeIncome = dailyVolume * 0.01 * share;
     return (feeIncome * 365) / positionValue;
   }
 
-  private getPositionValue(pair: PairSnapshot): number {
-    const share = this.getShare(pair);
+  private getPositionValue(pair: PairSnapshot, share = this.getShare(pair)): number {
     if (share <= 0) return 0;
 
     const reserve0 = this.toDecimal(pair.reserve0);
