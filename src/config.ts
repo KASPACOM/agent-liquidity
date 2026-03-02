@@ -109,14 +109,14 @@ export const CONFIG = {
     {
       name: 'Galleon Testnet',
       chainId: 38836,
-      enabled: false,  // Not running here yet, but config ready
+      enabled: false,  // Flip to true to activate Galleon
       rpcUrl: 'https://galleon-testnet.igralabs.com:8545',
 
       // DEX contracts (if any - TBD)
-      vaultAddress: undefined,
-      routerAddress: undefined,
-      factoryAddress: undefined,
-      wkasAddress: undefined,
+      vaultAddress: '0x983E517e872301828d5d35aD646929beC41bD54c',
+      routerAddress: '0xC69B228c4591508067c87bf78743080eE1270e2A',
+      factoryAddress: '0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0',
+      wkasAddress: '0x394C68684F9AFCEb9b804531EF07a864E8081738',
       pairs: [],
 
       // Aave contracts
@@ -155,3 +155,4 @@ export const CONFIG = {
 };
 
 export type { ChainConfig, PairConfig };
+
