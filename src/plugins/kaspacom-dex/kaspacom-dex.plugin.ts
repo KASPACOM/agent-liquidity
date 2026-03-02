@@ -22,7 +22,6 @@ const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     factoryAddress: "0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0",
     wkasAddress: "0x394C68684F9AFCEb9b804531EF07a864E8081738",
     vaultAddress: "0x983E517e872301828d5d35aD646929beC41bD54c",
-    vaultAddress: "0x983E517e872301828d5d35aD646929beC41bD54c",
   },
   // Add Kasplex Mainnet and Galleon Mainnet when deployed
 };
