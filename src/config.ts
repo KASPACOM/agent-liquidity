@@ -121,9 +121,9 @@ export const CONFIG = {
 
       // Aave contracts
       aaveContracts: {
-        pool: '0x631BC5c362ce203B6043844f93f2c67D23a87994',
-        poolDataProvider: '0x22B9bDEA931cE0b137DAEf80B2228a288ba05835',
-        oracle: '0x6f10A47E2Df6138a36Bc785DA927Ea4072fd4c8f',
+        pool: '0xb265EA393A9297472628E21575AE5c7E6458A1F2',
+        poolDataProvider: '0xc6b4592171EC79192f838E4050a2453D4D71fBAe',
+        oracle: '0x5B83681E48f365cfD2A4Ee29E2B699e38e04EbD9',
       },
 
       // Liquidation strategy
