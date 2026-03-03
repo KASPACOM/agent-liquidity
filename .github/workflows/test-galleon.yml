@@ -1,0 +1,67 @@
+name: Galleon Testnet Stress Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - dex
+          - aave
+      cycles:
+        description: 'Number of trading cycles (DEX)'
+        required: false
+        default: '3'
+
+env:
+  RPC_URL: https://galleon-testnet.igralabs.com:8545
+  CHAIN_ID: 38836
+
+jobs:
+  dex-stress-test:
+    if: inputs.test_suite == 'all' || inputs.test_suite == 'dex'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Run DEX Stress Test
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.IGRA_DEPLOYER_KEY }}
+          RPC_URL: ${{ env.RPC_URL }}
+          CHAIN_ID: ${{ env.CHAIN_ID }}
+        run: npx tsx scripts/dex-stress-test.ts --cycles ${{ inputs.cycles || '3' }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dex-stress-results
+          path: stress-test-results/
+
+  aave-stress-test:
+    if: inputs.test_suite == 'all' || inputs.test_suite == 'aave'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Run Aave Stress Test
+        env:
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.IGRA_DEPLOYER_KEY }}
+          RPC_URL: ${{ env.RPC_URL }}
+          CHAIN_ID: ${{ env.CHAIN_ID }}
+        run: npx tsx scripts/aave-stress-test.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aave-stress-results
+          path: stress-test-results/
