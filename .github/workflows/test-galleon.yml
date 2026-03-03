@@ -1,33 +1,12 @@
-name: Tests & Galleon Stress Tests
+name: Tests
 
 on:
   pull_request:
     branches: [main, develop]
   push:
     branches: [main, develop]
-  workflow_dispatch:
-    inputs:
-      test_suite:
-        description: 'Test suite to run'
-        required: true
-        default: 'unit'
-        type: choice
-        options:
-          - unit
-          - all
-          - dex-stress
-          - aave-stress
-      cycles:
-        description: 'Number of trading cycles (DEX stress)'
-        required: false
-        default: '3'
-
-env:
-  RPC_URL: https://galleon-testnet.igralabs.com:8545
-  CHAIN_ID: 38836
 
 jobs:
-  # ── Unit tests — runs on every PR and push ──
   unit-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -37,57 +16,5 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
-      - name: Run unit tests (vitest)
+      - name: Run unit tests
         run: npx vitest run --reporter=verbose
-
-  # ── DEX stress test — manual dispatch only ──
-  dex-stress-test:
-    if: >-
-      github.event_name == 'workflow_dispatch' &&
-      (inputs.test_suite == 'all' || inputs.test_suite == 'dex-stress')
-    needs: unit-tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm ci
-      - name: Run DEX Stress Test
-        env:
-          DEPLOYER_PRIVATE_KEY: ${{ secrets.IGRA_DEPLOYER_KEY }}
-          RPC_URL: ${{ env.RPC_URL }}
-          CHAIN_ID: ${{ env.CHAIN_ID }}
-        run: npx tsx scripts/dex-stress-test.ts --cycles ${{ inputs.cycles || '3' }}
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: dex-stress-results
-          path: stress-test-results/
-
-  # ── Aave stress test — manual dispatch only ──
-  aave-stress-test:
-    if: >-
-      github.event_name == 'workflow_dispatch' &&
-      (inputs.test_suite == 'all' || inputs.test_suite == 'aave-stress')
-    needs: unit-tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm ci
-      - name: Run Aave Stress Test
-        env:
-          DEPLOYER_PRIVATE_KEY: ${{ secrets.IGRA_DEPLOYER_KEY }}
-          RPC_URL: ${{ env.RPC_URL }}
-          CHAIN_ID: ${{ env.CHAIN_ID }}
-        run: npx tsx scripts/aave-stress-test.ts
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: aave-stress-results
-          path: stress-test-results/
