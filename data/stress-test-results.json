@@ -1,0 +1,158 @@
+{
+  "timestamp": "2026-03-02T18:51:27.514Z",
+  "network": "galleon-testnet",
+  "chainId": 38836,
+  "wallets": [
+    {
+      "index": 1,
+      "address": "0xeD582b26Da95F84fbbe331E7Af6f36255fddd1E7",
+      "scenario": "Moderate USDC supplier",
+      "collateral": [
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "WKAS",
+          "amount": "20000"
+        }
+      ],
+      "healthFactor": "115792089237316195423570985008687907853269984665640564039457.584007913129639935",
+      "totalCollateralUsd": "5000",
+      "totalDebtUsd": "0",
+      "availableBorrowsUsd": "4650",
+      "currentLiquidationThreshold": "9500",
+      "txHashes": [
+        "0x01fafbbbd1efef8dc01d908aa905aabef2ef8dabb60b92da334e1cba8c72299c",
+        "0xa74149e29a8ea131a1c89e2aa4c1115f7d936a6811353f4392b57cad064688a6",
+        "0xc0b9fcef6f703912bdd509538ccdebc5892e8e30232c46261d93442cc37519f7",
+        "0x6566072daf4aee9e8d019db0c9c5bfcac2ec1dd95918e595278ea8e25bfae4c9",
+        "0xb952043a5be495e5fa3c1d2a3eb60bd7ca2408c933365acc359da3ac060ff15f"
+      ]
+    },
+    {
+      "index": 2,
+      "address": "0x215597346075ED2aa2942Ca8ACA6bB98609AB34E",
+      "scenario": "High LTV WKAS borrower",
+      "collateral": [
+        {
+          "token": "USDC",
+          "amount": "10000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "WKAS",
+          "amount": "83700"
+        }
+      ],
+      "healthFactor": "115792089237316195423570985008687907853269984665640564039457.584007913129639935",
+      "totalCollateralUsd": "10000",
+      "totalDebtUsd": "0",
+      "availableBorrowsUsd": "9300",
+      "currentLiquidationThreshold": "9500",
+      "txHashes": [
+        "0x76773c2f5db6f92541af11580c851536bb55c62d55f1b8e6ad47866a1c8ed59d",
+        "0xc433df5d1c0166dab205ed7e91da59f7822a538a0a2a5cd86bd4b30f540acbcf",
+        "0x5a67ca1189451c530862a77d37bf16bf26d6c41d60d2a87462dc30e619ed37ae",
+        "0x412b94940b19986d7eec39db67ae43ee93bb3484fd5775a34907d1d4888fc2ad",
+        "0x9aa583a1d0f250824bff1de8f4e2c0b69cf4d769c43d0900b1fcacda9f97674e"
+      ]
+    },
+    {
+      "index": 3,
+      "address": "0x0E160df44eC9a53B0619F24797b593580C106B65",
+      "scenario": "Multi-asset position",
+      "collateral": [
+        {
+          "token": "WBTC",
+          "amount": "0.5"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "amount": "2000"
+        },
+        {
+          "token": "USDC",
+          "amount": "1000"
+        }
+      ],
+      "healthFactor": "7.999999989333333347",
+      "totalCollateralUsd": "30000",
+      "totalDebtUsd": "3000.000004",
+      "availableBorrowsUsd": "17999.999996",
+      "currentLiquidationThreshold": "8000",
+      "txHashes": [
+        "0xfb7c22cdeb7a3f29de259245208e954840c4f13d1cbe9cae4deeb710c25aa563",
+        "0xaf95c68998487fd2e455e690ef27dafa256b132bcfbe385816d10c1c93b5fe66",
+        "0xab7d6d45e0aabe6d2e840fb2d01ded3b45716926426fec7b22cc22a73aae9136",
+        "0x413981f092f75459c85f9ee7e12ef9c4eb78e31b4d8cfa2144615a90e3f21745",
+        "0x3253fe16ef00b1068e7be7137840f596253aed82f1c2dc7078ec1537c9380562",
+        "0x5fef3f33672c9b073cd869abeb2b50e661525e17fa32c9e0c722d1273d74e859",
+        "0x18cac48b29e7a134618999a39d0ae87bb22adbab0781f9be966ded49a53e5a13"
+      ]
+    },
+    {
+      "index": 4,
+      "address": "0x2CD0572f530711d03Fb19f3185F7798a2E034896",
+      "scenario": "Max leverage",
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "amount": "10350"
+        }
+      ],
+      "healthFactor": "1.231884057851991878",
+      "totalCollateralUsd": "15000",
+      "totalDebtUsd": "10350.000001",
+      "availableBorrowsUsd": "899.999999",
+      "currentLiquidationThreshold": "8500",
+      "txHashes": [
+        "0xacef04111dc33168f316a6e62426004f06c27c586812b4a7d79da0175d3c3d9c",
+        "0xd9d7af601cdd8f5e1c14d6a2a4931079792a01ec8010e13ffbc7ebfa6a07271d",
+        "0x50a385c0ac7f78c3372c798c0c3f73517370c909e58b410507d8a0a7a2fba0b1",
+        "0x8f0123f3c4a865927c68076dd7e986071273da311b6f7930bf7f5ededd17d68d",
+        "0xb77ce95081e65ee0812ed6ab8a27f17d397c2a508529f8657558a0a287193769"
+      ]
+    },
+    {
+      "index": 5,
+      "address": "0xD242964B773cab44F605b6Bd354093f6143e8245",
+      "scenario": "Stablecoin collateral",
+      "collateral": [
+        {
+          "token": "DAI",
+          "amount": "10000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "healthFactor": "1.89999999962",
+      "totalCollateralUsd": "10000",
+      "totalDebtUsd": "5000.000001",
+      "availableBorrowsUsd": "4299.999999",
+      "currentLiquidationThreshold": "9500",
+      "txHashes": [
+        "0xd52fa48ed2d54792975c5d4627f6ceba51f6a0f48bd39d5b13abe296521dac27",
+        "0x922ac7b731fc1a6df2b32c0ce1a656ab3f0753eec32d7eb3840a789e67741b89",
+        "0x1e1613b8e2e7be2f0e7834f5fa4715eb7aa15983bd125571ef3fdabe606172b9",
+        "0xa5a6edb96017487be96ad9ac01906592d9e58126e0ed2211cbce25c75b6cdb54",
+        "0x56f84f936bbc99b41bbf268a8920a392a5cde1ccbc8be2ccec0f97d9567025d0"
+      ]
+    }
+  ]
+}

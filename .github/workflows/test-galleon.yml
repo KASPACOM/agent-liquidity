@@ -1,19 +1,24 @@
-name: Galleon Testnet Stress Tests
+name: Tests & Galleon Stress Tests
 
 on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
   workflow_dispatch:
     inputs:
       test_suite:
         description: 'Test suite to run'
         required: true
-        default: 'all'
+        default: 'unit'
         type: choice
         options:
+          - unit
           - all
-          - dex
-          - aave
+          - dex-stress
+          - aave-stress
       cycles:
-        description: 'Number of trading cycles (DEX)'
+        description: 'Number of trading cycles (DEX stress)'
         required: false
         default: '3'
 
@@ -22,8 +27,25 @@ env:
   CHAIN_ID: 38836
 
 jobs:
+  # ── Unit tests — runs on every PR and push ──
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Run unit tests (vitest)
+        run: npx vitest run --reporter=verbose
+
+  # ── DEX stress test — manual dispatch only ──
   dex-stress-test:
-    if: inputs.test_suite == 'all' || inputs.test_suite == 'dex'
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.test_suite == 'all' || inputs.test_suite == 'dex-stress')
+    needs: unit-tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -44,8 +66,12 @@ jobs:
           name: dex-stress-results
           path: stress-test-results/
 
+  # ── Aave stress test — manual dispatch only ──
   aave-stress-test:
-    if: inputs.test_suite == 'all' || inputs.test_suite == 'aave'
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.test_suite == 'all' || inputs.test_suite == 'aave-stress')
+    needs: unit-tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

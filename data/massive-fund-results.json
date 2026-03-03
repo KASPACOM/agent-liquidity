@@ -1,0 +1,108 @@
+{
+  "wallets": [
+    {
+      "index": 1,
+      "address": "0x169BD46d0178E95fe1942126e8de6Fc7AF24101c",
+      "scenario": "USDC whale \u2014 safe",
+      "collateralUsd": "100000",
+      "debtUsd": "30000",
+      "healthFactor": "3.17",
+      "risk": "\ud83d\udfe2",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0x169BD46d0178E95fe1942126e8de6Fc7AF24101c"
+    },
+    {
+      "index": 2,
+      "address": "0xE0A1C8eB3409828A4D4f39AdA0ACaEefBAe8D541",
+      "scenario": "USDT whale \u2014 safe",
+      "collateralUsd": "100000",
+      "debtUsd": "30000",
+      "healthFactor": "3.17",
+      "risk": "\ud83d\udfe2",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0xE0A1C8eB3409828A4D4f39AdA0ACaEefBAe8D541"
+    },
+    {
+      "index": 3,
+      "address": "0xf9732775f68a6f2c85B0A4B0Bc095a3354604B3A",
+      "scenario": "Stablecoin mix",
+      "collateralUsd": "100000",
+      "debtUsd": "60000",
+      "healthFactor": "1.58",
+      "risk": "\ud83d\udfe1",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0xf9732775f68a6f2c85B0A4B0Bc095a3354604B3A"
+    },
+    {
+      "index": 4,
+      "address": "0x178Af8b8b09A3EC77A2A5022a996ce4eF501ac4D",
+      "scenario": "ETH whale",
+      "collateralUsd": "60000",
+      "debtUsd": "35000",
+      "healthFactor": "1.46",
+      "risk": "\ud83d\udd34",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0x178Af8b8b09A3EC77A2A5022a996ce4eF501ac4D"
+    },
+    {
+      "index": 5,
+      "address": "0xe6694022a6f45681854aB117334D24A6e85C6d47",
+      "scenario": "BTC whale",
+      "collateralUsd": "300000",
+      "debtUsd": "150000",
+      "healthFactor": "1.60",
+      "risk": "\ud83d\udfe1",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0xe6694022a6f45681854aB117334D24A6e85C6d47"
+    },
+    {
+      "index": 6,
+      "address": "0xca3eDB54449D1CE7BADFa3925C6d5EE8e55ADAe9",
+      "scenario": "DAI \u2192 borrow ETH",
+      "collateralUsd": "100000",
+      "debtUsd": "60000",
+      "healthFactor": "1.58",
+      "risk": "\ud83d\udfe1",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0xca3eDB54449D1CE7BADFa3925C6d5EE8e55ADAe9"
+    },
+    {
+      "index": 7,
+      "address": "0xFd65f58901cC4f9dc565cEcbc1964408A851b90d",
+      "scenario": "Multi-asset",
+      "collateralUsd": "95000",
+      "debtUsd": "50000",
+      "healthFactor": "1.59",
+      "risk": "\ud83d\udfe1",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0xFd65f58901cC4f9dc565cEcbc1964408A851b90d"
+    },
+    {
+      "index": 8,
+      "address": "0xce63dc1AdF7628511FC5B68d95B9776A51fba6cF",
+      "scenario": "Mixed volatile+stable",
+      "collateralUsd": "160000",
+      "debtUsd": "80000",
+      "healthFactor": "1.64",
+      "risk": "\ud83d\udfe1",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0xce63dc1AdF7628511FC5B68d95B9776A51fba6cF"
+    },
+    {
+      "index": 9,
+      "address": "0x4F5d172740160181E6E168c67A61fc1A0a2af3fC",
+      "scenario": "Near-liquidation USDC\u2192WETH \ud83d\udd34",
+      "collateralUsd": "50000",
+      "debtUsd": "42600",
+      "healthFactor": "1.12",
+      "risk": "\ud83d\udd34",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0x4F5d172740160181E6E168c67A61fc1A0a2af3fC"
+    },
+    {
+      "index": 10,
+      "address": "0x974478A174597B4b29F952D5C334fEe9fC4fcc60",
+      "scenario": "Near-liquidation WETH\u2192USDC \ud83d\udd34",
+      "collateralUsd": "45000",
+      "debtUsd": "30000",
+      "healthFactor": "1.27",
+      "risk": "\ud83d\udd34",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/address/0x974478A174597B4b29F952D5C334fEe9fC4fcc60"
+    }
+  ],
+  "summary": {
+    "totalCollateralUsd": 1110000.0044656899,
+    "totalDebtUsd": 567600.03499905
+  }
+}
