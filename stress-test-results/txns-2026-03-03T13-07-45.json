@@ -1,0 +1,8 @@
+{
+  "failedAt": "2026-03-03T13:07:45.742Z",
+  "error": "Factory returned zero pair for 0x683c834E5c0B9Ee0e612d076c2398C7A46EF3a22/0x394C68684F9AFCEb9b804531EF07a864E8081738",
+  "rpcUrl": "https://galleon-testnet.igralabs.com:8545",
+  "chainId": 38836,
+  "deployerAddress": "0x537dB45aC71bf8e1f1e28530732FAeabD607778E",
+  "explorerUrl": "https://explorer.galleon-testnet.igralabs.com"
+}

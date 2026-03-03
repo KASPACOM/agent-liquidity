@@ -1,0 +1,2 @@
+DEX stress test failed at 2026-03-03T11:46:03.143Z
+One or more required contracts are not deployed at the configured addresses
