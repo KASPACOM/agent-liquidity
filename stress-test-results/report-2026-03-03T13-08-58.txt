@@ -1,0 +1,44 @@
+═══════════════════════════════════════════
+    DEX STRESS TEST REPORT — IGRA Galleon
+═══════════════════════════════════════════
+Duration: 20.78m
+Network: Galleon Testnet (38836)
+
+DEPLOYED TOKENS:
+  STRESSA: 0x3e528399BB1cb283Beb4513E88a29003a5457725 (tx: 0xce2e95d68d988cf4aa3136337e4cc89d5f4df5a2a6695265aee31e7739106740)
+  STRESSB: 0xD1a05f8C51994266AEC735C452995Ce06E659A24 (tx: 0xa2c31b1cf3b6c4d19b0ced6e9637a36bf109aee0180d9418a850911c179e5d22)
+  STRESSC: 0x11C9b332eca87Bd2878ac0620f192127E7BaEd84 (tx: 0x9bacd37d04f878f04863aaa6b3343449314df4880644a27486c6f454588d97b6)
+
+PAIRS CREATED:
+  STRESSA/WKAS: 0x9123abF9c3C1B53DEAa1422FBF1CdfD859499C93 (tx: 0x6c8fd31fbd8158ae3cbe7f40f37689c488cfb09448bc80d22da6a4e1f8f1eb15)
+  STRESSB/WKAS: 0x444510692DD4A714daf18CF04aB8C22eB78139DC (tx: 0xb1047b406ea0b80df0bea47cbe2ecf1d7ac9d560c916c83cc3d58eb9680beac8)
+  STRESSC/WKAS: 0x8cb809bC2f0eEb5cce6D4491DD7e33bd095BD39a (tx: 0xf006ef84fc5e464b66507394bab0d7f537a28e370918cd8f6c9296336df7bc65)
+  STRESSA/STRESSB: 0x19026da30440E0dAAE10B5f91aA748e63D2c9FB3 (tx: 0xa592bbb8903938b687f89db973df34e2e099d653f8c68050bba787a9f684a8ae)
+
+TRADING SUMMARY:
+  Total trades: 175
+  Total gas spent: 57.974078 iKAS
+
+  Wallet 1 (Market Maker):
+    Trades: 41 | Volume: 390.391643314963457907 iKAS | P&L: -347.937676990857952377 iKAS
+  Wallet 2 (Arbitrageur):
+    Trades: 24 | Arb attempts: 44 | Profitable: 15 | Net: -474.044362916807443641 iKAS
+  Wallet 3 (Whale):
+    Trades: 33 | Volume: 3323.388207743788586241 iKAS | Max slippage: 100.00%
+  Wallet 4 (Retail Trader):
+    Trades: 57 | Volume: 752.796574783179383001 iKAS | Avg slippage: 2.90%
+  Wallet 5 (LP Manager):
+    LP cycles: 9 | IL range: -87.23% to 51.62%
+
+PRICE MOVEMENTS:
+  STRESSA/WKAS: start 0.010000 -> end 0.004249 (-57.51%)
+  STRESSB/WKAS: start 0.010000 -> end 0.003864 (-61.36%)
+  STRESSC/WKAS: start 0.001000 -> end 0.000514 (-48.64%)
+
+VAULT STATUS:
+  Starting balance: 0.0 iKAS
+  Ending balance: 0.0 iKAS
+  LP positions: {"STRESSA/WKAS":"0","STRESSB/WKAS":"0","STRESSC/WKAS":"0","STRESSA/STRESSB":"0"}
+  Notes: Vault liquidity cycle skipped: AgentVault exposes only router-backed liquidity methods, so direct pair mint/burn is not safely callable from this script
+
+ALL TRANSACTIONS: /home/coder/projects/evm/agent-liquidity/stress-test-results/txns-2026-03-03T13-08-58.json

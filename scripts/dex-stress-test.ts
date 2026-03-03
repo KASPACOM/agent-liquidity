@@ -4,7 +4,6 @@ import { dirname, resolve } from 'node:path';
 import {
   Contract,
   JsonRpcProvider,
-  MaxUint256,
   NonceManager,
   Wallet,
   ZeroAddress,
@@ -28,17 +27,17 @@ const RPC_URL = 'https://galleon-testnet.igralabs.com:8545';
 const CHAIN_ID = 38836;
 const EXPLORER_URL = 'https://explorer.galleon-testnet.igralabs.com';
 const DEFAULT_DURATION_MS = 18 * 60 * 1000;
-const ROUTER_ADDRESS = '0xC1E42A2a214eD7bE35c9e89AAA1354d9B28f3640';
+const ROUTER_ADDRESS = '0xC69B228c4591508067c87bf78743080eE1270e2A';
 const WRAPPER_ROUTER_ADDRESS = '0x1f99e4a0b40cdb6f25ea92fef6eda326f9317d6b';
-const FACTORY_ADDRESS = '0xd98a97c3bfaa934a8b7298c5d8757967ef30e0a2';
+const FACTORY_ADDRESS = '0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0';
 const WKAS_ADDRESS = '0x394C68684F9AFCEb9b804531EF07a864E8081738';
-const ERC20_DEPLOYER_ADDRESS = '0x2acFaabD568d082B1720f04e577CD840E3a22C46';
+const ERC20_DEPLOYER_ADDRESS = '0xC8E13bddDb1E0B878de0996c27F0c3738e2709eA'; // official KaspaCom ERC20MintableDeployer on Galleon
 const AGENT_VAULT_ADDRESS = '0x983E517e872301828d5d35aD646929beC41bD54c';
 const MAX_TRADE_SIZE_KAS = BigInt(Math.trunc(CONFIG.maxTradeSizeKas)) * 10n ** 18n;
 const TX_OVERRIDES = {
   type: 0,
   gasPrice: 2_000_000_000_000n,
-  gasLimit: 500_000n,
+  gasLimit: 3_000_000n, // KaspaComPair deployment needs ~1.5M, ERC20Mintable ~950K, swaps ~200K
 } as const;
 
 const ROUTER_ABI = [
@@ -176,6 +175,87 @@ const ROUTER_ABI = [
       { name: 'path', type: 'address[]' },
     ],
     outputs: [{ name: 'amounts', type: 'uint256[]' }],
+  },
+] as const;
+
+const WKAS_ABI = [
+  { type: 'function', name: 'deposit', stateMutability: 'payable', inputs: [], outputs: [] },
+  {
+    type: 'function',
+    name: 'withdraw',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'wad', type: 'uint256' }],
+    outputs: [],
+  },
+  {
+    type: 'function',
+    name: 'balanceOf',
+    stateMutability: 'view',
+    inputs: [{ name: '', type: 'address' }],
+    outputs: [{ type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'transfer',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'dst', type: 'address' },
+      { name: 'wad', type: 'uint256' },
+    ],
+    outputs: [{ type: 'bool' }],
+  },
+  {
+    type: 'function',
+    name: 'approve',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'guy', type: 'address' },
+      { name: 'wad', type: 'uint256' },
+    ],
+    outputs: [{ type: 'bool' }],
+  },
+] as const;
+
+const DIRECT_PAIR_ABI = [
+  ...PAIR_ABI,
+  {
+    type: 'function',
+    name: 'mint',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'to', type: 'address' }],
+    outputs: [{ name: 'liquidity', type: 'uint256' }],
+  },
+  {
+    type: 'function',
+    name: 'burn',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'to', type: 'address' }],
+    outputs: [
+      { name: 'amount0', type: 'uint256' },
+      { name: 'amount1', type: 'uint256' },
+    ],
+  },
+  {
+    type: 'function',
+    name: 'swap',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'amount0Out', type: 'uint256' },
+      { name: 'amount1Out', type: 'uint256' },
+      { name: 'to', type: 'address' },
+      { name: 'data', type: 'bytes' },
+    ],
+    outputs: [],
+  },
+  {
+    type: 'function',
+    name: 'transfer',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'recipient', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
   },
 ] as const;
 
@@ -415,8 +495,16 @@ function deterministicWallet(basePrivateKey: string, index: number, provider: Js
   throw new Error(`Unable to derive deterministic wallet ${index}`);
 }
 
-function deadline(): bigint {
-  return BigInt(Math.floor(Date.now() / 1000) + 3600);
+// Chain clock offset: Galleon block.timestamp can be ahead of system clock.
+// We fetch the latest block timestamp once at startup and use it as the base.
+let chainTimeOffsetSec = 0;
+async function syncChainTime(provider: JsonRpcProvider): Promise<void> {
+  const block = await provider.getBlock('latest');
+  if (block) {
+    const systemNow = Math.floor(Date.now() / 1000);
+    chainTimeOffsetSec = block.timestamp - systemNow;
+    console.log(`Chain time offset: ${chainTimeOffsetSec}s (block.timestamp=${block.timestamp}, systemNow=${systemNow})`);
+  }
 }
 
 function delay(ms: number): Promise<void> {
@@ -430,6 +518,14 @@ function randomBetween(rng: () => number, min: number, max: number): number {
 function applySlippage(amount: bigint, bps: number): bigint {
   const safeBps = Math.max(0, Math.min(bps, 9_999));
   return (amount * BigInt(10_000 - safeBps)) / 10_000n;
+}
+
+function getAmountOut(amountIn: bigint, reserveIn: bigint, reserveOut: bigint): bigint {
+  if (amountIn <= 0n || reserveIn <= 0n || reserveOut <= 0n) {
+    return 0n;
+  }
+  const amountInWithFee = amountIn * 99n;
+  return (amountInWithFee * reserveOut) / (reserveIn * 100n + amountInWithFee);
 }
 
 function clampKasTradeSize(amountWei: bigint): bigint {
@@ -616,14 +712,111 @@ function connected(contract: AnyContract, signer: NonceManager): AnyContract {
   return contract.connect(signer) as AnyContract;
 }
 
+function getPairContract(address: string, runner: NonceManager | JsonRpcProvider): AnyContract {
+  return new Contract(address, DIRECT_PAIR_ABI, runner) as AnyContract;
+}
+
+function getWkasContract(runner: NonceManager | JsonRpcProvider): AnyContract {
+  return new Contract(WKAS_ADDRESS, WKAS_ABI, runner) as AnyContract;
+}
+
+async function getDirectPairAddress(
+  context: RuntimeContext,
+  tokenA: string,
+  tokenB: string
+): Promise<string> {
+  return getAddress(await context.factory['getPair'](tokenA, tokenB));
+}
+
+async function ensurePairExists(
+  context: RuntimeContext,
+  signer: NonceManager,
+  actor: string,
+  phase: string,
+  tokenA: string,
+  tokenB: string
+): Promise<string> {
+  let pairAddress = await getDirectPairAddress(context, tokenA, tokenB);
+  if (pairAddress !== ZeroAddress) {
+    return pairAddress;
+  }
+
+  const receipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    `create pair ${tokenA}/${tokenB}`,
+    async () => new Contract(FACTORY_ADDRESS, FACTORY_ABI, signer)['createPair'](tokenA, tokenB, TX_OVERRIDES),
+    { tokenA, tokenB }
+  );
+
+  if (!receipt || receipt.status !== 1) {
+    throw new Error(`Failed to create pair for ${tokenA}/${tokenB}`);
+  }
+
+  // Parse PairCreated event from receipt logs to avoid stale provider cache
+  // PairCreated(address indexed token0, address indexed token1, address pair, uint256)
+  // topic[0] = event sig, topic[1] = token0, topic[2] = token1, data = pair address (first 32 bytes) + allPairsLength
+  const PAIR_CREATED_TOPIC = '0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9';
+  const pairLog = receipt.logs?.find(
+    (l: any) => l.address.toLowerCase() === FACTORY_ADDRESS.toLowerCase()
+      && l.topics?.[0]?.toLowerCase() === PAIR_CREATED_TOPIC
+  );
+  if (pairLog) {
+    // pair address is first 32 bytes of data (ABI-encoded address)
+    pairAddress = getAddress('0x' + pairLog.data.slice(26, 66));
+    return pairAddress;
+  }
+
+  // Fallback: query factory (allow slight delay for RPC to catch up)
+  await new Promise(r => setTimeout(r, 2000));
+  pairAddress = await getDirectPairAddress(context, tokenA, tokenB);
+  if (pairAddress === ZeroAddress) {
+    throw new Error(`Factory returned zero pair for ${tokenA}/${tokenB}`);
+  }
+
+  return pairAddress;
+}
+
+async function quoteDirectAmountOut(
+  context: RuntimeContext,
+  tokenIn: string,
+  tokenOut: string,
+  amountIn: bigint
+): Promise<bigint> {
+  const pairAddress = await getDirectPairAddress(context, tokenIn, tokenOut);
+  if (pairAddress === ZeroAddress) {
+    return 0n;
+  }
+
+  const pairContract = getPairContract(pairAddress, context.provider);
+  const [token0, reserves] = await Promise.all([
+    pairContract['token0'](),
+    pairContract['getReserves'](),
+  ]);
+  const reserve0 = BigInt(reserves[0]);
+  const reserve1 = BigInt(reserves[1]);
+  const isToken0In = getAddress(tokenIn) === getAddress(token0);
+  return getAmountOut(amountIn, isToken0In ? reserve0 : reserve1, isToken0In ? reserve1 : reserve0);
+}
+
 async function quoteAmountsOut(
   context: RuntimeContext,
   path: readonly string[],
   amountIn: bigint
 ): Promise<bigint[] | null> {
   try {
-    const amounts = await context.router['getAmountsOut'](amountIn, path);
-    return Array.from(amounts as Iterable<bigint>, (value) => BigInt(value));
+    if (path.length < 2) {
+      return [amountIn];
+    }
+
+    const amounts: bigint[] = [amountIn];
+    let running = amountIn;
+    for (let i = 0; i < path.length - 1; i += 1) {
+      running = await quoteDirectAmountOut(context, path[i]!, path[i + 1]!, running);
+      amounts.push(running);
+    }
+    return amounts;
   } catch {
     return null;
   }
@@ -642,40 +835,6 @@ async function getNativeBalance(context: RuntimeContext, account: string): Promi
   return await context.provider.getBalance(account);
 }
 
-async function ensureApproval(
-  context: RuntimeContext,
-  signer: NonceManager,
-  actor: string,
-  token: TokenConfig,
-  spender: string,
-  phase: string
-): Promise<void> {
-  const contract = new Contract(token.address, MINTABLE_ERC20_ABI, signer);
-  const owner = await signer.getAddress();
-  const allowance = BigInt(await contract['allowance'](owner, spender));
-  if (allowance >= MaxUint256 / 2n) {
-    return;
-  }
-
-  const receipt = await sendLoggedTx(
-    context,
-    phase,
-    actor,
-    `approve ${token.symbol} -> ${spender}`,
-    async () => contract['approve'](spender, MaxUint256, TX_OVERRIDES),
-    { token: token.address, spender }
-  );
-
-  if (!receipt || receipt.status !== 1) {
-    throw new Error(`Approval failed for ${token.symbol}`);
-  }
-
-  const stats = context.walletStats.get(owner);
-  if (stats && receipt.gasUsed && receipt.gasPrice) {
-    stats.gasSpentWei += BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice);
-  }
-}
-
 async function deployStressToken(
   context: RuntimeContext,
   symbol: StressTokenKey,
@@ -683,15 +842,6 @@ async function deployStressToken(
   decimals: number,
   supply: bigint
 ): Promise<TokenConfig> {
-  const predicted = getAddress(
-    await context.erc20Deployer['deploy'].staticCall(
-      name,
-      symbol,
-      decimals,
-      supply,
-      context.deployerAddress
-    )
-  );
   const receipt = await sendLoggedTx(
     context,
     'setup',
@@ -706,20 +856,29 @@ async function deployStressToken(
         context.deployerAddress,
         TX_OVERRIDES
       ),
-    { predictedAddress: predicted, decimals, supply: supply.toString() }
+    { decimals, supply: supply.toString() }
   );
 
   if (!receipt || receipt.status !== 1) {
     throw new Error(`Failed to deploy ${symbol}`);
   }
 
+  // Parse deployed token address from TokenDeployed event log (topic[1] = indexed token address)
+  const deployedLog = receipt.logs?.find(
+    (l: any) => l.address.toLowerCase() === ERC20_DEPLOYER_ADDRESS.toLowerCase() && l.topics?.length >= 2
+  );
+  if (!deployedLog) {
+    throw new Error(`Could not find TokenDeployed event log for ${symbol}`);
+  }
+  const tokenAddress = getAddress('0x' + deployedLog.topics[1].slice(26));
+
   return {
     key: symbol,
     symbol,
     name,
-    address: predicted,
+    address: tokenAddress,
     decimals,
-    deployedTxHash: receipt.hash,
+    deployedTxHash: receipt.transactionHash ?? receipt.hash,
   };
 }
 
@@ -745,6 +904,231 @@ async function transferToken(
   if (!receipt || receipt.status !== 1) {
     throw new Error(`Transfer failed for ${token.symbol}`);
   }
+}
+
+async function wrapNative(
+  context: RuntimeContext,
+  signer: NonceManager,
+  actor: string,
+  amount: bigint,
+  phase: string
+): Promise<{ hash: string; gasCostWei: bigint }> {
+  const wkas = getWkasContract(signer);
+  const receipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    'wrap WKAS',
+    async () => wkas['deposit']({ ...TX_OVERRIDES, value: amount }),
+    { amount: amount.toString() }
+  );
+
+  if (!receipt || receipt.status !== 1) {
+    throw new Error('WKAS deposit failed');
+  }
+
+  return {
+    hash: receipt.hash,
+    gasCostWei: BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice),
+  };
+}
+
+async function unwrapWkas(
+  context: RuntimeContext,
+  signer: NonceManager,
+  actor: string,
+  amount: bigint,
+  phase: string
+): Promise<{ hash: string; gasCostWei: bigint }> {
+  const wkas = getWkasContract(signer);
+  const receipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    'unwrap WKAS',
+    async () => wkas['withdraw'](amount, TX_OVERRIDES),
+    { amount: amount.toString() }
+  );
+
+  if (!receipt || receipt.status !== 1) {
+    throw new Error('WKAS withdraw failed');
+  }
+
+  return {
+    hash: receipt.hash,
+    gasCostWei: BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice),
+  };
+}
+
+async function directAddLiquidity(
+  context: RuntimeContext,
+  signer: NonceManager,
+  pair: PairConfig,
+  tokenA: TokenConfig,
+  amountA: bigint,
+  tokenB: TokenConfig,
+  amountB: bigint,
+  actor: string,
+  phase: string
+): Promise<{ hash: string; gasCostWei: bigint }> {
+  const pairContract = getPairContract(pair.pairAddress, signer);
+  const tokenAContract = new Contract(tokenA.address, ERC20_ABI, signer) as AnyContract;
+  const tokenBContract = new Contract(tokenB.address, ERC20_ABI, signer) as AnyContract;
+  let gasCostWei = 0n;
+
+  const transferAReceipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    `transfer ${tokenA.symbol} to ${pair.key}`,
+    async () => tokenAContract['transfer'](pair.pairAddress, amountA, TX_OVERRIDES),
+    { pair: pair.key, token: tokenA.address, amount: amountA.toString() }
+  );
+  if (!transferAReceipt || transferAReceipt.status !== 1) {
+    throw new Error(`Failed to transfer ${tokenA.symbol} into ${pair.key}`);
+  }
+  gasCostWei += BigInt(transferAReceipt.gasUsed) * BigInt(transferAReceipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+
+  const transferBReceipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    `transfer ${tokenB.symbol} to ${pair.key}`,
+    async () => tokenBContract['transfer'](pair.pairAddress, amountB, TX_OVERRIDES),
+    { pair: pair.key, token: tokenB.address, amount: amountB.toString() }
+  );
+  if (!transferBReceipt || transferBReceipt.status !== 1) {
+    throw new Error(`Failed to transfer ${tokenB.symbol} into ${pair.key}`);
+  }
+  gasCostWei += BigInt(transferBReceipt.gasUsed) * BigInt(transferBReceipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+
+  const recipient = await signer.getAddress();
+  const mintReceipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    `mint LP ${pair.key}`,
+    async () => pairContract['mint'](recipient, TX_OVERRIDES),
+    { pair: pair.key, recipient }
+  );
+  if (!mintReceipt || mintReceipt.status !== 1) {
+    throw new Error(`Failed to mint LP for ${pair.key}`);
+  }
+  gasCostWei += BigInt(mintReceipt.gasUsed) * BigInt(mintReceipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+
+  return { hash: mintReceipt.hash, gasCostWei };
+}
+
+async function directRemoveLiquidity(
+  context: RuntimeContext,
+  signer: NonceManager,
+  pair: PairConfig,
+  lpAmount: bigint,
+  actor: string,
+  phase: string
+): Promise<{ hash: string; gasCostWei: bigint }> {
+  const pairContract = getPairContract(pair.pairAddress, signer);
+  let gasCostWei = 0n;
+
+  const transferReceipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    `return LP ${pair.key}`,
+    async () => pairContract['transfer'](pair.pairAddress, lpAmount, TX_OVERRIDES),
+    { pair: pair.key, liquidity: lpAmount.toString() }
+  );
+  if (!transferReceipt || transferReceipt.status !== 1) {
+    throw new Error(`Failed to return LP tokens for ${pair.key}`);
+  }
+  gasCostWei += BigInt(transferReceipt.gasUsed) * BigInt(transferReceipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+
+  const recipient = await signer.getAddress();
+  const burnReceipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    `burn LP ${pair.key}`,
+    async () => pairContract['burn'](recipient, TX_OVERRIDES),
+    { pair: pair.key, recipient }
+  );
+  if (!burnReceipt || burnReceipt.status !== 1) {
+    throw new Error(`Failed to burn LP for ${pair.key}`);
+  }
+  gasCostWei += BigInt(burnReceipt.gasUsed) * BigInt(burnReceipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+
+  return { hash: burnReceipt.hash, gasCostWei };
+}
+
+async function directSwap(
+  context: RuntimeContext,
+  signer: NonceManager,
+  pairAddress: string,
+  tokenIn: string,
+  amountIn: bigint,
+  actor: string,
+  phase: string,
+  recipient?: string,
+  transferIn = true
+): Promise<{ amountOutWei: bigint; txHash: string; gasCostWei: bigint }> {
+  const pairContract = getPairContract(pairAddress, signer);
+  const [token0, reserves] = await Promise.all([
+    pairContract['token0'](),
+    pairContract['getReserves'](),
+  ]);
+  const isToken0In = getAddress(tokenIn) === getAddress(token0);
+  const reserve0 = BigInt(reserves[0]);
+  const reserve1 = BigInt(reserves[1]);
+  const reserveIn = isToken0In ? reserve0 : reserve1;
+  const reserveOut = isToken0In ? reserve1 : reserve0;
+  const amountOutWei = getAmountOut(amountIn, reserveIn, reserveOut);
+  if (amountOutWei <= 0n) {
+    throw new Error(`Swap quote is zero for pair ${pairAddress}`);
+  }
+
+  let gasCostWei = 0n;
+  if (transferIn) {
+    const tokenInContract = new Contract(tokenIn, ERC20_ABI, signer) as AnyContract;
+    const transferReceipt = await sendLoggedTx(
+      context,
+      phase,
+      actor,
+      `transfer swap input ${tokenIn}`,
+      async () => tokenInContract['transfer'](pairAddress, amountIn, TX_OVERRIDES),
+      { pairAddress, tokenIn, amountIn: amountIn.toString() }
+    );
+    if (!transferReceipt || transferReceipt.status !== 1) {
+      throw new Error(`Failed to transfer swap input ${tokenIn}`);
+    }
+    gasCostWei += BigInt(transferReceipt.gasUsed) * BigInt(transferReceipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+  }
+
+  const to = recipient ?? (await signer.getAddress());
+  const swapReceipt = await sendLoggedTx(
+    context,
+    phase,
+    actor,
+    `swap on pair ${pairAddress}`,
+    async () =>
+      pairContract['swap'](
+        isToken0In ? 0n : amountOutWei,
+        isToken0In ? amountOutWei : 0n,
+        to,
+        '0x',
+        TX_OVERRIDES
+      ),
+    { pairAddress, tokenIn, amountIn: amountIn.toString(), amountOutWei: amountOutWei.toString(), to }
+  );
+  if (!swapReceipt || swapReceipt.status !== 1) {
+    throw new Error(`Swap failed on pair ${pairAddress}`);
+  }
+  gasCostWei += BigInt(swapReceipt.gasUsed) * BigInt(swapReceipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+
+  return {
+    amountOutWei,
+    txHash: swapReceipt.hash,
+    gasCostWei,
+  };
 }
 
 async function sendNative(
@@ -785,79 +1169,54 @@ async function bootstrapPair(
 ): Promise<PairConfig> {
   const tokenA = context.tokens[tokenAKey];
   const tokenB = context.tokens[tokenBKey];
+  const pairAddress = await ensurePairExists(
+    context,
+    context.deployer,
+    'Deployer',
+    'setup',
+    tokenA.address,
+    tokenB.address
+  );
+  const pairConfig: PairConfig = {
+    key: pairKey,
+    tokenA: tokenAKey,
+    tokenB: tokenBKey,
+    pairAddress,
+    createdTxHash: '',
+    creationMode: mode,
+  };
 
+  let lastTx: string | undefined;
   if (mode === 'addLiquidityETH') {
-    const token = tokenAKey === 'WKAS' ? tokenB : tokenA;
     const nativeAmount = tokenAKey === 'WKAS' ? amountA : amountB;
-    const tokenAmount = tokenAKey === 'WKAS' ? amountB : amountA;
-    const to = context.deployerAddress;
-    const receipt = await sendLoggedTx(
+    const wrapResult = await wrapNative(context, context.deployer, 'Deployer', nativeAmount, 'setup');
+    const addResult = await directAddLiquidity(
       context,
-      'setup',
+      context.deployer,
+      pairConfig,
+      tokenA,
+      amountA,
+      tokenB,
+      amountB,
       'Deployer',
-      `bootstrap ${pairKey}`,
-      async () =>
-        context.router['addLiquidityETH'](
-          token.address,
-          tokenAmount,
-          0n,
-          0n,
-          to,
-          deadline(),
-          {
-            ...TX_OVERRIDES,
-            value: nativeAmount,
-          }
-        ),
-      {
-        token: token.address,
-        tokenAmount: tokenAmount.toString(),
-        nativeAmount: nativeAmount.toString(),
-        mode,
-      }
+      'setup'
     );
-
-    if (!receipt || receipt.status !== 1) {
-      throw new Error(`Failed to bootstrap ${pairKey}`);
-    }
+    lastTx = addResult.hash ?? wrapResult.hash;
   } else {
-    const receipt = await sendLoggedTx(
+    const addResult = await directAddLiquidity(
       context,
-      'setup',
+      context.deployer,
+      pairConfig,
+      tokenA,
+      amountA,
+      tokenB,
+      amountB,
       'Deployer',
-      `bootstrap ${pairKey}`,
-      async () =>
-        context.router['addLiquidity'](
-          tokenA.address,
-          tokenB.address,
-          amountA,
-          amountB,
-          0n,
-          0n,
-          context.deployerAddress,
-          deadline(),
-          TX_OVERRIDES
-        ),
-      {
-        tokenA: tokenA.address,
-        tokenB: tokenB.address,
-        amountA: amountA.toString(),
-        amountB: amountB.toString(),
-        mode,
-      }
+      'setup'
     );
-
-    if (!receipt || receipt.status !== 1) {
-      throw new Error(`Failed to bootstrap ${pairKey}`);
-    }
+    lastTx = addResult.hash;
   }
 
-  const pairAddress = getAddress(await context.factory['getPair'](tokenA.address, tokenB.address));
-  if (pairAddress === ZeroAddress) {
-    throw new Error(`Factory returned zero pair for ${pairKey}`);
-  }
-
-  const lastTx = context.txs[context.txs.length - 1]?.hash;
   if (!lastTx) {
     throw new Error(`Missing bootstrap tx hash for ${pairKey}`);
   }
@@ -1000,10 +1359,6 @@ async function setup(context: RuntimeContext): Promise<{ startPrices: Record<Pai
   context.tokens.STRESSB = stressTokens.STRESSB;
   context.tokens.STRESSC = stressTokens.STRESSC;
 
-  for (const token of Object.values(stressTokens)) {
-    await ensureApproval(context, context.deployer, 'Deployer', token, ROUTER_ADDRESS, 'setup');
-  }
-
   const walletFunding = [
     ['STRESSA', parseUnits('150000', 18)],
     ['STRESSB', parseUnits('150000', 18)],
@@ -1095,33 +1450,6 @@ async function setup(context: RuntimeContext): Promise<{ startPrices: Record<Pai
     context.pairs.set(pair.key, pair);
   }
 
-  for (const wallet of context.stressWallets) {
-    for (const tokenKey of ['STRESSA', 'STRESSB', 'STRESSC'] as const) {
-      await ensureApproval(context, wallet.signer, wallet.role, context.tokens[tokenKey], ROUTER_ADDRESS, 'setup');
-    }
-  }
-
-  for (const wallet of context.stressWallets) {
-    const pairContracts = pairConfigs.map((pair) => new Contract(pair.pairAddress, ERC20_ABI, wallet.signer));
-    for (const pairContract of pairContracts) {
-      const spender = ROUTER_ADDRESS;
-      const allowance = BigInt(
-        await pairContract['allowance'](wallet.address, spender)
-      );
-      if (allowance >= MaxUint256 / 2n) {
-        continue;
-      }
-      await sendLoggedTx(
-        context,
-        'setup',
-        wallet.role,
-        'approve LP token',
-        async () => pairContract['approve'](spender, MaxUint256, TX_OVERRIDES),
-        { pairToken: await pairContract.getAddress(), spender }
-      );
-    }
-  }
-
   const startPrices = {
     'STRESSA/WKAS': await getPairPriceInKas(context, 'STRESSA/WKAS'),
     'STRESSB/WKAS': await getPairPriceInKas(context, 'STRESSB/WKAS'),
@@ -1151,6 +1479,11 @@ async function performBuyWithNative(
 ): Promise<{ success: boolean; amountOutWei: bigint; expectedOutWei: bigint; txHash?: string }> {
   const token = context.tokens[tokenKey];
   const beforeToken = await getTokenBalance(context, token, wallet.address);
+  const pairAddress = await getDirectPairAddress(context, WKAS_ADDRESS, token.address);
+  if (pairAddress === ZeroAddress) {
+    pushError(context, `${wallet.role} missing pair for WKAS/${token.symbol}`);
+    return { success: false, amountOutWei: 0n, expectedOutWei: 0n };
+  }
   const quote = await quoteAmountsOut(context, [WKAS_ADDRESS, token.address], amountInWei);
   if (!quote) {
     pushError(context, `${wallet.role} failed to quote buy ${token.symbol}`);
@@ -1158,32 +1491,23 @@ async function performBuyWithNative(
   }
 
   const expectedOutWei = quote[quote.length - 1];
-  const minOutWei = applySlippage(expectedOutWei, slippageBps);
-  const receipt = await sendLoggedTx(
-    context,
-    'trading',
-    wallet.role,
-    action,
-    async () =>
-      connected(context.router, wallet.signer)['swapExactETHForTokens'](
-        minOutWei,
-        [WKAS_ADDRESS, token.address],
-        wallet.address,
-        deadline(),
-        {
-          ...TX_OVERRIDES,
-          value: amountInWei,
-        }
-      ),
-    {
-      token: token.address,
-      amountInWei: amountInWei.toString(),
-      expectedOutWei: expectedOutWei.toString(),
-      minOutWei: minOutWei.toString(),
-    }
-  );
-
-  if (!receipt || receipt.status !== 1) {
+  let txHash: string | undefined;
+  let gasCostWei = 0n;
+  try {
+    const wrapResult = await wrapNative(context, wallet.signer, wallet.role, amountInWei, 'trading');
+    const swapResult = await directSwap(
+      context,
+      wallet.signer,
+      pairAddress,
+      WKAS_ADDRESS,
+      amountInWei,
+      wallet.role,
+      'trading',
+      wallet.address
+    );
+    txHash = swapResult.txHash;
+    gasCostWei = wrapResult.gasCostWei + swapResult.gasCostWei;
+  } catch (error) {
     const stats = getWalletStats(context, wallet);
     stats.failedTrades += 1;
     recordTrade(context, {
@@ -1197,10 +1521,10 @@ async function performBuyWithNative(
       amountInSymbol: 'iKAS',
       amountOutSymbol: token.symbol,
       expectedOutWei: expectedOutWei.toString(),
-      txHash: receipt?.hash,
-      error: 'buy transaction failed',
+      txHash,
+      error: shortError(error),
     });
-    return { success: false, amountOutWei: 0n, expectedOutWei, txHash: receipt?.hash };
+    return { success: false, amountOutWei: 0n, expectedOutWei, txHash };
   }
 
   const afterToken = await getTokenBalance(context, token, wallet.address);
@@ -1209,7 +1533,7 @@ async function performBuyWithNative(
   stats.trades += 1;
   stats.successfulTrades += 1;
   stats.volumeKasWei += amountInWei;
-  stats.gasSpentWei += BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+  stats.gasSpentWei += gasCostWei;
   const slippage = expectedOutWei === 0n
     ? 0
     : Number(((expectedOutWei - actualOutWei) * 10_000n) / expectedOutWei);
@@ -1228,10 +1552,10 @@ async function performBuyWithNative(
     amountOutSymbol: token.symbol,
     expectedOutWei: expectedOutWei.toString(),
     slippageBps: Math.max(slippage, 0),
-    txHash: receipt.hash,
+    txHash,
   });
 
-  return { success: true, amountOutWei: actualOutWei, expectedOutWei, txHash: receipt.hash };
+  return { success: true, amountOutWei: actualOutWei, expectedOutWei, txHash };
 }
 
 async function performSellForNative(
@@ -1245,6 +1569,12 @@ async function performSellForNative(
   const token = context.tokens[tokenKey];
   const beforeNative = await getNativeBalance(context, wallet.address);
   const beforeToken = await getTokenBalance(context, token, wallet.address);
+  const beforeWkas = await getTokenBalance(context, context.tokens.WKAS, wallet.address);
+  const pairAddress = await getDirectPairAddress(context, token.address, WKAS_ADDRESS);
+  if (pairAddress === ZeroAddress) {
+    pushError(context, `${wallet.role} missing pair for ${token.symbol}/WKAS`);
+    return { success: false, amountOutWei: 0n, expectedOutWei: 0n };
+  }
   const quote = await quoteAmountsOut(context, [token.address, WKAS_ADDRESS], amountInWei);
   if (!quote) {
     pushError(context, `${wallet.role} failed to quote sell ${token.symbol}`);
@@ -1252,30 +1582,25 @@ async function performSellForNative(
   }
 
   const expectedOutWei = quote[quote.length - 1];
-  const minOutWei = applySlippage(expectedOutWei, slippageBps);
-  const receipt = await sendLoggedTx(
-    context,
-    'trading',
-    wallet.role,
-    action,
-    async () =>
-      connected(context.router, wallet.signer)['swapExactTokensForETH'](
-        amountInWei,
-        minOutWei,
-        [token.address, WKAS_ADDRESS],
-        wallet.address,
-        deadline(),
-        TX_OVERRIDES
-      ),
-    {
-      token: token.address,
-      amountInWei: amountInWei.toString(),
-      expectedOutWei: expectedOutWei.toString(),
-      minOutWei: minOutWei.toString(),
-    }
-  );
-
-  if (!receipt || receipt.status !== 1) {
+  let txHash: string | undefined;
+  let gasCost = 0n;
+  try {
+    const swapResult = await directSwap(
+      context,
+      wallet.signer,
+      pairAddress,
+      token.address,
+      amountInWei,
+      wallet.role,
+      'trading',
+      wallet.address
+    );
+    const afterWkas = await getTokenBalance(context, context.tokens.WKAS, wallet.address);
+    const wkasReceived = afterWkas - beforeWkas;
+    const unwrapResult = await unwrapWkas(context, wallet.signer, wallet.role, wkasReceived, 'trading');
+    txHash = unwrapResult.hash ?? swapResult.txHash;
+    gasCost = swapResult.gasCostWei + unwrapResult.gasCostWei;
+  } catch (error) {
     const stats = getWalletStats(context, wallet);
     stats.failedTrades += 1;
     recordTrade(context, {
@@ -1289,15 +1614,14 @@ async function performSellForNative(
       amountInSymbol: token.symbol,
       amountOutSymbol: 'iKAS',
       expectedOutWei: expectedOutWei.toString(),
-      txHash: receipt?.hash,
-      error: 'sell transaction failed',
+      txHash,
+      error: shortError(error),
     });
-    return { success: false, amountOutWei: 0n, expectedOutWei, txHash: receipt?.hash };
+    return { success: false, amountOutWei: 0n, expectedOutWei, txHash };
   }
 
   const afterNative = await getNativeBalance(context, wallet.address);
   const afterToken = await getTokenBalance(context, token, wallet.address);
-  const gasCost = BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice);
   const actualOutWei = afterNative - beforeNative + gasCost;
   const actualInWei = beforeToken - afterToken;
   const stats = getWalletStats(context, wallet);
@@ -1323,10 +1647,10 @@ async function performSellForNative(
     amountOutSymbol: 'iKAS',
     expectedOutWei: expectedOutWei.toString(),
     slippageBps: Math.max(slippage, 0),
-    txHash: receipt.hash,
+    txHash,
   });
 
-  return { success: true, amountOutWei: actualOutWei, expectedOutWei, txHash: receipt.hash };
+  return { success: true, amountOutWei: actualOutWei, expectedOutWei, txHash };
 }
 
 async function performTokenToTokenSwap(
@@ -1341,6 +1665,12 @@ async function performTokenToTokenSwap(
   const tokenIn = context.tokens[tokenInKey];
   const tokenOut = context.tokens[tokenOutKey];
   const beforeOut = await getTokenBalance(context, tokenOut, wallet.address);
+  const pairInAddress = await getDirectPairAddress(context, tokenIn.address, WKAS_ADDRESS);
+  const pairOutAddress = await getDirectPairAddress(context, WKAS_ADDRESS, tokenOut.address);
+  if (pairInAddress === ZeroAddress || pairOutAddress === ZeroAddress) {
+    pushError(context, `${wallet.role} missing path for ${tokenIn.symbol}->WKAS->${tokenOut.symbol}`);
+    return { success: false, amountOutWei: 0n, expectedOutWei: 0n };
+  }
   const quote = await quoteAmountsOut(context, [tokenIn.address, WKAS_ADDRESS, tokenOut.address], amountInWei);
   if (!quote) {
     pushError(context, `${wallet.role} failed to quote token swap ${tokenIn.symbol}->${tokenOut.symbol}`);
@@ -1348,31 +1678,33 @@ async function performTokenToTokenSwap(
   }
 
   const expectedOutWei = quote[quote.length - 1];
-  const minOutWei = applySlippage(expectedOutWei, slippageBps);
-  const receipt = await sendLoggedTx(
-    context,
-    'trading',
-    wallet.role,
-    action,
-    async () =>
-      connected(context.router, wallet.signer)['swapExactTokensForTokens'](
-        amountInWei,
-        minOutWei,
-        [tokenIn.address, WKAS_ADDRESS, tokenOut.address],
-        wallet.address,
-        deadline(),
-        TX_OVERRIDES
-      ),
-    {
-      tokenIn: tokenIn.address,
-      tokenOut: tokenOut.address,
-      amountInWei: amountInWei.toString(),
-      expectedOutWei: expectedOutWei.toString(),
-      minOutWei: minOutWei.toString(),
-    }
-  );
-
-  if (!receipt || receipt.status !== 1) {
+  let txHash: string | undefined;
+  let gasCostWei = 0n;
+  try {
+    const firstHop = await directSwap(
+      context,
+      wallet.signer,
+      pairInAddress,
+      tokenIn.address,
+      amountInWei,
+      wallet.role,
+      'trading',
+      pairOutAddress
+    );
+    const secondHop = await directSwap(
+      context,
+      wallet.signer,
+      pairOutAddress,
+      WKAS_ADDRESS,
+      firstHop.amountOutWei,
+      wallet.role,
+      'trading',
+      wallet.address,
+      false
+    );
+    txHash = secondHop.txHash;
+    gasCostWei = firstHop.gasCostWei + secondHop.gasCostWei;
+  } catch (error) {
     const stats = getWalletStats(context, wallet);
     stats.failedTrades += 1;
     recordTrade(context, {
@@ -1386,8 +1718,8 @@ async function performTokenToTokenSwap(
       amountInSymbol: tokenIn.symbol,
       amountOutSymbol: tokenOut.symbol,
       expectedOutWei: expectedOutWei.toString(),
-      txHash: receipt?.hash,
-      error: 'token swap failed',
+      txHash,
+      error: shortError(error),
     });
     return { success: false, amountOutWei: 0n, expectedOutWei };
   }
@@ -1398,7 +1730,7 @@ async function performTokenToTokenSwap(
   stats.trades += 1;
   stats.successfulTrades += 1;
   stats.volumeKasWei += await quoteKasValue(context, tokenInKey, amountInWei);
-  stats.gasSpentWei += BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+  stats.gasSpentWei += gasCostWei;
   const slippage = expectedOutWei === 0n
     ? 0
     : Number(((expectedOutWei - actualOutWei) * 10_000n) / expectedOutWei);
@@ -1417,7 +1749,7 @@ async function performTokenToTokenSwap(
     amountOutSymbol: tokenOut.symbol,
     expectedOutWei: expectedOutWei.toString(),
     slippageBps: Math.max(slippage, 0),
-    txHash: receipt.hash,
+    txHash,
   });
 
   return { success: true, amountOutWei: actualOutWei, expectedOutWei };
@@ -1558,32 +1890,30 @@ async function addLiquidityCycle(
     if (pair.tokenB === 'WKAS') {
       const beforeToken = await getTokenBalance(context, tokenA, wallet.address);
       const beforeNative = await getNativeBalance(context, wallet.address);
-      const receipt = await sendLoggedTx(
-        context,
-        'trading',
-        wallet.role,
-        `lp remove ${pairKey}`,
-        async () =>
-          connected(context.router, wallet.signer)['removeLiquidityETH'](
-            tokenA.address,
-            lpBalance,
-            0n,
-            0n,
-            wallet.address,
-            deadline(),
-            TX_OVERRIDES
-          ),
-        { pair: pairKey, liquidity: lpBalance.toString() }
-      );
-
-      if (!receipt || receipt.status !== 1) {
+      const beforeWkas = await getTokenBalance(context, context.tokens.WKAS, wallet.address);
+      let txHash: string | undefined;
+      let gasCost = 0n;
+      try {
+        const removeResult = await directRemoveLiquidity(
+          context,
+          wallet.signer,
+          pair,
+          lpBalance,
+          wallet.role,
+          'trading'
+        );
+        const afterWkas = await getTokenBalance(context, context.tokens.WKAS, wallet.address);
+        const wkasReturned = afterWkas - beforeWkas;
+        const unwrapResult = await unwrapWkas(context, wallet.signer, wallet.role, wkasReturned, 'trading');
+        txHash = unwrapResult.hash ?? removeResult.hash;
+        gasCost = removeResult.gasCostWei + unwrapResult.gasCostWei;
+      } catch {
         getWalletStats(context, wallet).failedTrades += 1;
         return;
       }
 
       const afterToken = await getTokenBalance(context, tokenA, wallet.address);
       const afterNative = await getNativeBalance(context, wallet.address);
-      const gasCost = BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice);
       const returnedToken = afterToken - beforeToken;
       const returnedNative = afterNative - beforeNative + gasCost;
       const currentHoldValue =
@@ -1609,33 +1939,27 @@ async function addLiquidityCycle(
         direction: 'remove-liquidity',
         amountOutWei: returnedNative.toString(),
         amountOutSymbol: 'iKAS',
-        txHash: receipt.hash,
+        txHash,
       });
       return;
     }
 
     const beforeA = await getTokenBalance(context, tokenA, wallet.address);
     const beforeB = await getTokenBalance(context, tokenB, wallet.address);
-    const receipt = await sendLoggedTx(
-      context,
-      'trading',
-      wallet.role,
-      `lp remove ${pairKey}`,
-      async () =>
-        connected(context.router, wallet.signer)['removeLiquidity'](
-          tokenA.address,
-          tokenB.address,
-          lpBalance,
-          0n,
-          0n,
-          wallet.address,
-          deadline(),
-          TX_OVERRIDES
-        ),
-      { pair: pairKey, liquidity: lpBalance.toString() }
-    );
-
-    if (!receipt || receipt.status !== 1) {
+    let txHash: string | undefined;
+    let gasCostWei = 0n;
+    try {
+      const removeResult = await directRemoveLiquidity(
+        context,
+        wallet.signer,
+        pair,
+        lpBalance,
+        wallet.role,
+        'trading'
+      );
+      txHash = removeResult.hash;
+      gasCostWei = removeResult.gasCostWei;
+    } catch {
       getWalletStats(context, wallet).failedTrades += 1;
       return;
     }
@@ -1657,7 +1981,7 @@ async function addLiquidityCycle(
     stats.trades += 1;
     stats.successfulTrades += 1;
     stats.lpCycles += 1;
-    stats.gasSpentWei += BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+    stats.gasSpentWei += gasCostWei;
     stats.impermanentLossesBps.push(ilBps);
     context.lpState.delete(pairKey);
     recordTrade(context, {
@@ -1667,7 +1991,7 @@ async function addLiquidityCycle(
       success: true,
       pair: pairKey,
       direction: 'remove-liquidity',
-      txHash: receipt.hash,
+      txHash,
     });
     return;
   }
@@ -1677,32 +2001,24 @@ async function addLiquidityCycle(
       ? parseUnits(randomBetween(wallet.rng, 1_000, 5_000).toFixed(2), tokenA.decimals)
       : parseUnits(randomBetween(wallet.rng, 500, 2_500).toFixed(6), tokenA.decimals);
     const nativeAmount = parseEther(randomBetween(wallet.rng, 5, 25).toFixed(6));
-    const receipt = await sendLoggedTx(
-      context,
-      'trading',
-      wallet.role,
-      `lp add ${pairKey}`,
-      async () =>
-        connected(context.router, wallet.signer)['addLiquidityETH'](
-          tokenA.address,
-          tokenAmount,
-          applySlippage(tokenAmount, 500),
-          applySlippage(nativeAmount, 500),
-          wallet.address,
-          deadline(),
-          {
-            ...TX_OVERRIDES,
-            value: nativeAmount,
-          }
-        ),
-      {
-        pair: pairKey,
-        tokenAmount: tokenAmount.toString(),
-        nativeAmount: nativeAmount.toString(),
-      }
-    );
-
-    if (!receipt || receipt.status !== 1) {
+    let txHash: string | undefined;
+    let gasCostWei = 0n;
+    try {
+      const wrapResult = await wrapNative(context, wallet.signer, wallet.role, nativeAmount, 'trading');
+      const addResult = await directAddLiquidity(
+        context,
+        wallet.signer,
+        pair,
+        tokenA,
+        tokenAmount,
+        tokenB,
+        nativeAmount,
+        wallet.role,
+        'trading'
+      );
+      txHash = addResult.hash ?? wrapResult.hash;
+      gasCostWei = wrapResult.gasCostWei + addResult.gasCostWei;
+    } catch {
       getWalletStats(context, wallet).failedTrades += 1;
       return;
     }
@@ -1710,7 +2026,7 @@ async function addLiquidityCycle(
     const stats = getWalletStats(context, wallet);
     stats.trades += 1;
     stats.successfulTrades += 1;
-    stats.gasSpentWei += BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+    stats.gasSpentWei += gasCostWei;
     context.lpState.set(pairKey, {
       pairKey,
       tokenAAmountWei: tokenAmount,
@@ -1725,38 +2041,30 @@ async function addLiquidityCycle(
       success: true,
       pair: pairKey,
       direction: 'add-liquidity',
-      txHash: receipt.hash,
+      txHash,
     });
     return;
   }
 
   const amountA = parseUnits(randomBetween(wallet.rng, 1_000, 4_000).toFixed(6), tokenA.decimals);
   const amountB = parseUnits(randomBetween(wallet.rng, 1_000, 4_000).toFixed(6), tokenB.decimals);
-  const receipt = await sendLoggedTx(
-    context,
-    'trading',
-    wallet.role,
-    `lp add ${pairKey}`,
-    async () =>
-      connected(context.router, wallet.signer)['addLiquidity'](
-        tokenA.address,
-        tokenB.address,
-        amountA,
-        amountB,
-        applySlippage(amountA, 500),
-        applySlippage(amountB, 500),
-        wallet.address,
-        deadline(),
-        TX_OVERRIDES
-      ),
-    {
-      pair: pairKey,
-      amountA: amountA.toString(),
-      amountB: amountB.toString(),
-    }
-  );
-
-  if (!receipt || receipt.status !== 1) {
+  let txHash: string | undefined;
+  let gasCostWei = 0n;
+  try {
+    const addResult = await directAddLiquidity(
+      context,
+      wallet.signer,
+      pair,
+      tokenA,
+      amountA,
+      tokenB,
+      amountB,
+      wallet.role,
+      'trading'
+    );
+    txHash = addResult.hash;
+    gasCostWei = addResult.gasCostWei;
+  } catch {
     getWalletStats(context, wallet).failedTrades += 1;
     return;
   }
@@ -1764,7 +2072,7 @@ async function addLiquidityCycle(
   const stats = getWalletStats(context, wallet);
   stats.trades += 1;
   stats.successfulTrades += 1;
-  stats.gasSpentWei += BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice ?? TX_OVERRIDES.gasPrice);
+  stats.gasSpentWei += gasCostWei;
   context.lpState.set(pairKey, {
     pairKey,
     tokenAAmountWei: amountA,
@@ -1781,7 +2089,7 @@ async function addLiquidityCycle(
     success: true,
     pair: pairKey,
     direction: 'add-liquidity',
-    txHash: receipt.hash,
+    txHash,
   });
 }
 
@@ -1873,56 +2181,16 @@ async function vaultCycle(context: RuntimeContext): Promise<void> {
         pushError(context, note);
       }
 
-      if (vaultLpBalance === 0n && tokenABalance > parseUnits('1000', 18) && tokenBBalance > parseUnits('1000', 18)) {
-        if (remainingDailyVolumeWei < parseEther('25')) {
-          context.vaultState.notes.push('Vault add-liquidity skipped: remaining daily volume too low');
-        } else {
-          const amountA = tokenABalance / 2n;
-          const amountB = tokenBBalance / 2n;
-          const receipt = await sendLoggedTx(
-            context,
-            'vault',
-            'AgentVault',
-            'vault add liquidity STRESSA/STRESSB',
-            async () =>
-              connected(context.vault, context.deployer)['addLiquidity'](
-                context.tokens.STRESSA.address,
-                context.tokens.STRESSB.address,
-                amountA,
-                amountB,
-                applySlippage(amountA, 500),
-                applySlippage(amountB, 500),
-                deadline(),
-                TX_OVERRIDES
-              ),
-            { pair: 'STRESSA/STRESSB', amountA: amountA.toString(), amountB: amountB.toString() }
-          );
-
-          if (receipt?.status === 1) {
-            context.vaultState.activePair = 'STRESSA/STRESSB';
-          }
-        }
-      } else if (vaultLpBalance > 0n) {
-        const receipt = await sendLoggedTx(
-          context,
-          'vault',
-          'AgentVault',
-          'vault remove liquidity STRESSA/STRESSB',
-          async () =>
-            connected(context.vault, context.deployer)['removeLiquidity'](
-              context.tokens.STRESSA.address,
-              context.tokens.STRESSB.address,
-              vaultLpBalance / 2n,
-              0n,
-              0n,
-              deadline(),
-              TX_OVERRIDES
-            ),
-          { pair: 'STRESSA/STRESSB', liquidity: (vaultLpBalance / 2n).toString() }
-        );
-
-        if (receipt?.status === 1) {
-          context.vaultState.activePair = undefined;
+      if (
+        (vaultLpBalance === 0n && tokenABalance > parseUnits('1000', 18) && tokenBBalance > parseUnits('1000', 18)) ||
+        vaultLpBalance > 0n
+      ) {
+        const note =
+          remainingDailyVolumeWei < parseEther('25')
+            ? 'Vault liquidity cycle skipped: remaining daily volume too low'
+            : 'Vault liquidity cycle skipped: AgentVault exposes only router-backed liquidity methods, so direct pair mint/burn is not safely callable from this script';
+        if (!context.vaultState.notes.includes(note)) {
+          context.vaultState.notes.push(note);
         }
       }
     } catch (error) {
@@ -2217,6 +2485,7 @@ async function main(): Promise<void> {
   console.log(`Results file: ${context.resultsFile}`);
   console.log(`Report file: ${context.reportFile}`);
 
+  await syncChainTime(context.provider);
   await validateContracts(context);
   const { startPrices } = await setup(context);
 

@@ -1,0 +1,8 @@
+{
+  "failedAt": "2026-03-03T12:32:52.488Z",
+  "error": "Failed to deploy STRESSA",
+  "rpcUrl": "https://galleon-testnet.igralabs.com:8545",
+  "chainId": 38836,
+  "deployerAddress": "0x537dB45aC71bf8e1f1e28530732FAeabD607778E",
+  "explorerUrl": "https://explorer.galleon-testnet.igralabs.com"
+}

@@ -1,0 +1,623 @@
+{
+  "metadata": {
+    "startedAt": "2026-03-03T13:03:02.953Z",
+    "endedAt": "2026-03-03T13:04:27.035Z",
+    "durationMs": 84082,
+    "network": "Galleon Testnet",
+    "chainId": 38836,
+    "rpcUrl": "https://galleon-testnet.igralabs.com:8545",
+    "explorerUrl": "https://explorer.galleon-testnet.igralabs.com",
+    "routerAddress": "0xC69B228c4591508067c87bf78743080eE1270e2A",
+    "wrapperRouterAddress": "0x1f99e4a0b40cdb6f25ea92fef6eda326f9317d6b",
+    "factoryAddress": "0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0",
+    "vaultAddress": "0x983E517e872301828d5d35aD646929beC41bD54c",
+    "wKasAddress": "0x394C68684F9AFCEb9b804531EF07a864E8081738",
+    "deployerAddress": "0x537dB45aC71bf8e1f1e28530732FAeabD607778E"
+  },
+  "deployedTokens": {
+    "STRESSA": {
+      "key": "STRESSA",
+      "symbol": "STRESSA",
+      "name": "Stress Token A",
+      "address": "0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a",
+      "decimals": 18,
+      "deployedTxHash": "0x412847d6248c1c86e4a193003d60447eee6fe6304323c868b0cd0e750bd6d5de"
+    },
+    "STRESSB": {
+      "key": "STRESSB",
+      "symbol": "STRESSB",
+      "name": "Stress Token B",
+      "address": "0x377c48a546C9beac0Ac5939EC8E8437a514E52E8",
+      "decimals": 18,
+      "deployedTxHash": "0x2ed350bc9cded408ceddb43537679b335f6653971b3113671e1b7751ad74e163"
+    },
+    "STRESSC": {
+      "key": "STRESSC",
+      "symbol": "STRESSC",
+      "name": "Stress Token C",
+      "address": "0x814984E82a5bA947480e0150eAB3d3DaA15C4098",
+      "decimals": 6,
+      "deployedTxHash": "0x2605663bf7cb5ca8e9ad023cc1db1178c00e47ede896cacb6fe8e1d76b0f447c"
+    }
+  },
+  "pairs": {},
+  "txs": [
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "deploy STRESSA",
+      "submittedAt": "2026-03-03T13:03:03.259Z",
+      "success": true,
+      "context": {
+        "decimals": 18,
+        "supply": "10000000000000000000000000"
+      },
+      "hash": "0x412847d6248c1c86e4a193003d60447eee6fe6304323c868b0cd0e750bd6d5de",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x412847d6248c1c86e4a193003d60447eee6fe6304323c868b0cd0e750bd6d5de",
+      "minedAt": "2026-03-03T13:03:08.459Z",
+      "blockNumber": 3370018,
+      "gasUsed": "953277",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "1906554000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "deploy STRESSB",
+      "submittedAt": "2026-03-03T13:03:08.462Z",
+      "success": true,
+      "context": {
+        "decimals": 18,
+        "supply": "10000000000000000000000000"
+      },
+      "hash": "0x2ed350bc9cded408ceddb43537679b335f6653971b3113671e1b7751ad74e163",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x2ed350bc9cded408ceddb43537679b335f6653971b3113671e1b7751ad74e163",
+      "minedAt": "2026-03-03T13:03:11.774Z",
+      "blockNumber": 3370022,
+      "gasUsed": "953277",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "1906554000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "deploy STRESSC",
+      "submittedAt": "2026-03-03T13:03:11.775Z",
+      "success": true,
+      "context": {
+        "decimals": 6,
+        "supply": "10000000000000"
+      },
+      "hash": "0x2605663bf7cb5ca8e9ad023cc1db1178c00e47ede896cacb6fe8e1d76b0f447c",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x2605663bf7cb5ca8e9ad023cc1db1178c00e47ede896cacb6fe8e1d76b0f447c",
+      "minedAt": "2026-03-03T13:03:15.886Z",
+      "blockNumber": 3370026,
+      "gasUsed": "953241",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "1906482000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "send native",
+      "submittedAt": "2026-03-03T13:03:15.889Z",
+      "success": true,
+      "context": {
+        "recipient": "0x43c7Bf21bBb1AE9e62F2EF0C1d5161ab735e9040",
+        "amount": "500000000000000000000"
+      },
+      "hash": "0x066d9cb154cc8dc6e0cb0f1870c432304c4f2eeda742454a9b1c2692ec9194c3",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x066d9cb154cc8dc6e0cb0f1870c432304c4f2eeda742454a9b1c2692ec9194c3",
+      "minedAt": "2026-03-03T13:03:19.099Z",
+      "blockNumber": 3370029,
+      "gasUsed": "21000",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "42000000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSA",
+      "submittedAt": "2026-03-03T13:03:19.102Z",
+      "success": true,
+      "context": {
+        "token": "0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a",
+        "recipient": "0x43c7Bf21bBb1AE9e62F2EF0C1d5161ab735e9040",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0x4540891db01e9bfdadefbd513a347d4a144f8fbc0857858967ad1a7adda573cf",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x4540891db01e9bfdadefbd513a347d4a144f8fbc0857858967ad1a7adda573cf",
+      "minedAt": "2026-03-03T13:03:23.029Z",
+      "blockNumber": 3370032,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSB",
+      "submittedAt": "2026-03-03T13:03:23.032Z",
+      "success": true,
+      "context": {
+        "token": "0x377c48a546C9beac0Ac5939EC8E8437a514E52E8",
+        "recipient": "0x43c7Bf21bBb1AE9e62F2EF0C1d5161ab735e9040",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0x5f8f82ec19be1f9526be367afe9edf0f87d2dd02c4c13d3d8ffb78c8311e006b",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x5f8f82ec19be1f9526be367afe9edf0f87d2dd02c4c13d3d8ffb78c8311e006b",
+      "minedAt": "2026-03-03T13:03:26.140Z",
+      "blockNumber": 3370034,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSC",
+      "submittedAt": "2026-03-03T13:03:26.142Z",
+      "success": true,
+      "context": {
+        "token": "0x814984E82a5bA947480e0150eAB3d3DaA15C4098",
+        "recipient": "0x43c7Bf21bBb1AE9e62F2EF0C1d5161ab735e9040",
+        "amount": "250000000000"
+      },
+      "hash": "0x497005c5e8cfb0b986c34d1a3468f1b126a75c339f3c0751b3deef67afed5a38",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x497005c5e8cfb0b986c34d1a3468f1b126a75c339f3c0751b3deef67afed5a38",
+      "minedAt": "2026-03-03T13:03:29.430Z",
+      "blockNumber": 3370038,
+      "gasUsed": "51574",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103148000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "send native",
+      "submittedAt": "2026-03-03T13:03:29.433Z",
+      "success": true,
+      "context": {
+        "recipient": "0xC285b27960E58d191807C98fe5A30c8f6e428e73",
+        "amount": "500000000000000000000"
+      },
+      "hash": "0x481f26dbbe831c21bc8d8da34af0c6bb3427bd4e594ec63fd0a3e1f9c738d3cb",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x481f26dbbe831c21bc8d8da34af0c6bb3427bd4e594ec63fd0a3e1f9c738d3cb",
+      "minedAt": "2026-03-03T13:03:32.354Z",
+      "blockNumber": 3370041,
+      "gasUsed": "21000",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "42000000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSA",
+      "submittedAt": "2026-03-03T13:03:32.355Z",
+      "success": true,
+      "context": {
+        "token": "0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a",
+        "recipient": "0xC285b27960E58d191807C98fe5A30c8f6e428e73",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0x87edc01a88fe57c5a9f0a70c6fd2a74d903c7a222d20b4128eaa043355c13904",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x87edc01a88fe57c5a9f0a70c6fd2a74d903c7a222d20b4128eaa043355c13904",
+      "minedAt": "2026-03-03T13:03:36.283Z",
+      "blockNumber": 3370045,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSB",
+      "submittedAt": "2026-03-03T13:03:36.286Z",
+      "success": true,
+      "context": {
+        "token": "0x377c48a546C9beac0Ac5939EC8E8437a514E52E8",
+        "recipient": "0xC285b27960E58d191807C98fe5A30c8f6e428e73",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0x0bf14dec36f9c771d71a2845558d7994b8fdbf44ff914466c5a6826e35e2fc7f",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x0bf14dec36f9c771d71a2845558d7994b8fdbf44ff914466c5a6826e35e2fc7f",
+      "minedAt": "2026-03-03T13:03:38.847Z",
+      "blockNumber": 3370048,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSC",
+      "submittedAt": "2026-03-03T13:03:38.850Z",
+      "success": true,
+      "context": {
+        "token": "0x814984E82a5bA947480e0150eAB3d3DaA15C4098",
+        "recipient": "0xC285b27960E58d191807C98fe5A30c8f6e428e73",
+        "amount": "250000000000"
+      },
+      "hash": "0x1dc71b85b46bc533b27980c8f9342bea915f349a00886e34d4b3bf34fd071f8c",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x1dc71b85b46bc533b27980c8f9342bea915f349a00886e34d4b3bf34fd071f8c",
+      "minedAt": "2026-03-03T13:03:41.749Z",
+      "blockNumber": 3370050,
+      "gasUsed": "51574",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103148000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "send native",
+      "submittedAt": "2026-03-03T13:03:41.751Z",
+      "success": true,
+      "context": {
+        "recipient": "0x425648a6F8550E59bAD58a30cEe500d2b47C68cb",
+        "amount": "500000000000000000000"
+      },
+      "hash": "0xc71995f923c77459f635a212b2020e858bb3e03eba8b19aec385ba3a155f755c",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0xc71995f923c77459f635a212b2020e858bb3e03eba8b19aec385ba3a155f755c",
+      "minedAt": "2026-03-03T13:03:44.703Z",
+      "blockNumber": 3370053,
+      "gasUsed": "21000",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "42000000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSA",
+      "submittedAt": "2026-03-03T13:03:44.705Z",
+      "success": true,
+      "context": {
+        "token": "0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a",
+        "recipient": "0x425648a6F8550E59bAD58a30cEe500d2b47C68cb",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0x1cc0fc5fad0f29b4eb2a1da108d88496940413e48291e03cbf372576ced8ad51",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x1cc0fc5fad0f29b4eb2a1da108d88496940413e48291e03cbf372576ced8ad51",
+      "minedAt": "2026-03-03T13:03:47.677Z",
+      "blockNumber": 3370056,
+      "gasUsed": "51610",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103220000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSB",
+      "submittedAt": "2026-03-03T13:03:47.679Z",
+      "success": true,
+      "context": {
+        "token": "0x377c48a546C9beac0Ac5939EC8E8437a514E52E8",
+        "recipient": "0x425648a6F8550E59bAD58a30cEe500d2b47C68cb",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0xa359870f957e877e01b8425c9ed5069d88e27c57796f240606c822d767f02372",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0xa359870f957e877e01b8425c9ed5069d88e27c57796f240606c822d767f02372",
+      "minedAt": "2026-03-03T13:03:50.296Z",
+      "blockNumber": 3370059,
+      "gasUsed": "51610",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103220000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSC",
+      "submittedAt": "2026-03-03T13:03:50.298Z",
+      "success": true,
+      "context": {
+        "token": "0x814984E82a5bA947480e0150eAB3d3DaA15C4098",
+        "recipient": "0x425648a6F8550E59bAD58a30cEe500d2b47C68cb",
+        "amount": "250000000000"
+      },
+      "hash": "0xf6e85dc18fc8cc8d57f80046dcb12531c627ae8b8c22a9b01c2c337ba2c36433",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0xf6e85dc18fc8cc8d57f80046dcb12531c627ae8b8c22a9b01c2c337ba2c36433",
+      "minedAt": "2026-03-03T13:03:53.581Z",
+      "blockNumber": 3370062,
+      "gasUsed": "51562",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103124000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "send native",
+      "submittedAt": "2026-03-03T13:03:53.586Z",
+      "success": true,
+      "context": {
+        "recipient": "0x1c1C6bE9A22122c50e62a87d78Ef89D0492a01bB",
+        "amount": "500000000000000000000"
+      },
+      "hash": "0xb15d702a42349a80d4bf36391c65b21ef5050ccfd13d8b1bb18fd232f1ee45e3",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0xb15d702a42349a80d4bf36391c65b21ef5050ccfd13d8b1bb18fd232f1ee45e3",
+      "minedAt": "2026-03-03T13:03:56.539Z",
+      "blockNumber": 3370065,
+      "gasUsed": "21000",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "42000000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSA",
+      "submittedAt": "2026-03-03T13:03:56.541Z",
+      "success": true,
+      "context": {
+        "token": "0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a",
+        "recipient": "0x1c1C6bE9A22122c50e62a87d78Ef89D0492a01bB",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0x9a92861a7eeb1e65686525d785aa7634c2f30ed55bf2ec95cc46285e5033645c",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x9a92861a7eeb1e65686525d785aa7634c2f30ed55bf2ec95cc46285e5033645c",
+      "minedAt": "2026-03-03T13:03:59.266Z",
+      "blockNumber": 3370067,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSB",
+      "submittedAt": "2026-03-03T13:03:59.268Z",
+      "success": true,
+      "context": {
+        "token": "0x377c48a546C9beac0Ac5939EC8E8437a514E52E8",
+        "recipient": "0x1c1C6bE9A22122c50e62a87d78Ef89D0492a01bB",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0xd6547ad0466c6a9fd9a179bf6dde0404556db5a513553dafe8aa65eed26099ef",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0xd6547ad0466c6a9fd9a179bf6dde0404556db5a513553dafe8aa65eed26099ef",
+      "minedAt": "2026-03-03T13:04:02.413Z",
+      "blockNumber": 3370070,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSC",
+      "submittedAt": "2026-03-03T13:04:02.415Z",
+      "success": true,
+      "context": {
+        "token": "0x814984E82a5bA947480e0150eAB3d3DaA15C4098",
+        "recipient": "0x1c1C6bE9A22122c50e62a87d78Ef89D0492a01bB",
+        "amount": "250000000000"
+      },
+      "hash": "0x101fdbcf0f13d581898dbff118fc31914c455d5c83257ec01075cc5eb9727863",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x101fdbcf0f13d581898dbff118fc31914c455d5c83257ec01075cc5eb9727863",
+      "minedAt": "2026-03-03T13:04:05.110Z",
+      "blockNumber": 3370073,
+      "gasUsed": "51574",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103148000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "send native",
+      "submittedAt": "2026-03-03T13:04:05.112Z",
+      "success": true,
+      "context": {
+        "recipient": "0x4d83fab776dc39fAd992a409e072DE0883abe9E9",
+        "amount": "500000000000000000000"
+      },
+      "hash": "0x4d1996993c424e943780bc5796166b3ff2bc7664434990c13fbc33b56eb0e6e6",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x4d1996993c424e943780bc5796166b3ff2bc7664434990c13fbc33b56eb0e6e6",
+      "minedAt": "2026-03-03T13:04:08.278Z",
+      "blockNumber": 3370076,
+      "gasUsed": "21000",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "42000000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSA",
+      "submittedAt": "2026-03-03T13:04:08.284Z",
+      "success": true,
+      "context": {
+        "token": "0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a",
+        "recipient": "0x4d83fab776dc39fAd992a409e072DE0883abe9E9",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0x02b95aa8883d79eb8e9a4a06d1a1df61391c9f085fe452f68c31bbc0666a56eb",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x02b95aa8883d79eb8e9a4a06d1a1df61391c9f085fe452f68c31bbc0666a56eb",
+      "minedAt": "2026-03-03T13:04:11.439Z",
+      "blockNumber": 3370079,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSB",
+      "submittedAt": "2026-03-03T13:04:11.442Z",
+      "success": true,
+      "context": {
+        "token": "0x377c48a546C9beac0Ac5939EC8E8437a514E52E8",
+        "recipient": "0x4d83fab776dc39fAd992a409e072DE0883abe9E9",
+        "amount": "150000000000000000000000"
+      },
+      "hash": "0xb2be21e27a56b1c19890310b03a5f3928100bba75fa86fb231d953cb7b27221e",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0xb2be21e27a56b1c19890310b03a5f3928100bba75fa86fb231d953cb7b27221e",
+      "minedAt": "2026-03-03T13:04:13.765Z",
+      "blockNumber": 3370082,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSC",
+      "submittedAt": "2026-03-03T13:04:13.767Z",
+      "success": true,
+      "context": {
+        "token": "0x814984E82a5bA947480e0150eAB3d3DaA15C4098",
+        "recipient": "0x4d83fab776dc39fAd992a409e072DE0883abe9E9",
+        "amount": "250000000000"
+      },
+      "hash": "0x5fa546f9d552f8bc550819e33f1c5d9c5b7f4dca31ba6edbc8b4751c28ee1b63",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x5fa546f9d552f8bc550819e33f1c5d9c5b7f4dca31ba6edbc8b4751c28ee1b63",
+      "minedAt": "2026-03-03T13:04:18.733Z",
+      "blockNumber": 3370085,
+      "gasUsed": "51574",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103148000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSA",
+      "submittedAt": "2026-03-03T13:04:18.736Z",
+      "success": true,
+      "context": {
+        "token": "0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a",
+        "recipient": "0x983E517e872301828d5d35aD646929beC41bD54c",
+        "amount": "15000000000000000000000"
+      },
+      "hash": "0x58ac5022cede97a6dd48a018bf9e97bed3de72f0a946a30acab732447efde7c0",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x58ac5022cede97a6dd48a018bf9e97bed3de72f0a946a30acab732447efde7c0",
+      "minedAt": "2026-03-03T13:04:21.724Z",
+      "blockNumber": 3370089,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "transfer STRESSB",
+      "submittedAt": "2026-03-03T13:04:21.726Z",
+      "success": true,
+      "context": {
+        "token": "0x377c48a546C9beac0Ac5939EC8E8437a514E52E8",
+        "recipient": "0x983E517e872301828d5d35aD646929beC41bD54c",
+        "amount": "15000000000000000000000"
+      },
+      "hash": "0x9b5e4859c18ad3636ec6e2929be84ab232fec4e910fb9738b778f33a5393cfdf",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0x9b5e4859c18ad3636ec6e2929be84ab232fec4e910fb9738b778f33a5393cfdf",
+      "minedAt": "2026-03-03T13:04:25.252Z",
+      "blockNumber": 3370093,
+      "gasUsed": "51622",
+      "gasPrice": "2000000000000",
+      "gasCostWei": "103244000000000000"
+    },
+    {
+      "phase": "setup",
+      "actor": "Deployer",
+      "action": "create pair 0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a/0x394C68684F9AFCEb9b804531EF07a864E8081738",
+      "submittedAt": "2026-03-03T13:04:25.458Z",
+      "success": false,
+      "context": {
+        "tokenA": "0x26f391FfeE49bF8559c2De9C228F54e6e02bE15a",
+        "tokenB": "0x394C68684F9AFCEb9b804531EF07a864E8081738"
+      },
+      "hash": "0xc9a57ff7c88fb82a221b307b80818b891d888646d0fe0891a2681126999450ec",
+      "explorerUrl": "https://explorer.galleon-testnet.igralabs.com/tx/0xc9a57ff7c88fb82a221b307b80818b891d888646d0fe0891a2681126999450ec",
+      "minedAt": "2026-03-03T13:04:27.035Z",
+      "error": "transaction execution reverted (action=\"sendTransaction\", data=null, reason=null, invocation=null, revert=null, transaction={ \"data\": \"\", \"from\": \"0x537dB45aC71bf8e1f1e28530732FAeabD607778E\", \"to\": \"0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0\" }, receipt={ \"_type\": \"TransactionReceipt\", \"blobGasPrice\": null, \"blobGasUsed\": null, \"blockHash\": \"0x287c45455020482b1e2a659413bcb45aef147ddfac559dc9de2fdb74cf32934d\", \"blockNumber\": 3370096, \"contractAddress\": null, \"cumulativeGasUsed\": \"1480338\", \"from\": \"0x537dB45aC71bf8e1f1e28530732FAeabD607778E\", \"gasPrice\": \"2000000000000\", \"gasUsed\": \"1480338\", \"hash\": \"0xc9a57ff7c88fb82a221b307b80818b891d888646d0fe0891a2681126999450ec\", \"index\": 0, \"logs\": [  ], \"logsBloom\": \"0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\", \"root\": null, \"status\": 0, \"to\": \"0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0\" }, code=CALL_EXCEPTION, version=6.16.0)"
+    }
+  ],
+  "trades": [],
+  "wallets": [
+    {
+      "role": "Market Maker",
+      "address": "0x43c7Bf21bBb1AE9e62F2EF0C1d5161ab735e9040",
+      "trades": 0,
+      "successfulTrades": 0,
+      "failedTrades": 0,
+      "volumeKasWei": "0",
+      "gasSpentWei": "0",
+      "slippagesBps": [],
+      "arbAttempts": 0,
+      "profitableArbs": 0,
+      "arbNetKasWei": "0",
+      "lpCycles": 0,
+      "impermanentLossesBps": [],
+      "notes": [],
+      "startingValueKasWei": "0",
+      "endingValueKasWei": "0"
+    },
+    {
+      "role": "Arbitrageur",
+      "address": "0xC285b27960E58d191807C98fe5A30c8f6e428e73",
+      "trades": 0,
+      "successfulTrades": 0,
+      "failedTrades": 0,
+      "volumeKasWei": "0",
+      "gasSpentWei": "0",
+      "slippagesBps": [],
+      "arbAttempts": 0,
+      "profitableArbs": 0,
+      "arbNetKasWei": "0",
+      "lpCycles": 0,
+      "impermanentLossesBps": [],
+      "notes": [],
+      "startingValueKasWei": "0",
+      "endingValueKasWei": "0"
+    },
+    {
+      "role": "Whale",
+      "address": "0x425648a6F8550E59bAD58a30cEe500d2b47C68cb",
+      "trades": 0,
+      "successfulTrades": 0,
+      "failedTrades": 0,
+      "volumeKasWei": "0",
+      "gasSpentWei": "0",
+      "slippagesBps": [],
+      "arbAttempts": 0,
+      "profitableArbs": 0,
+      "arbNetKasWei": "0",
+      "lpCycles": 0,
+      "impermanentLossesBps": [],
+      "notes": [],
+      "startingValueKasWei": "0",
+      "endingValueKasWei": "0"
+    },
+    {
+      "role": "Retail Trader",
+      "address": "0x1c1C6bE9A22122c50e62a87d78Ef89D0492a01bB",
+      "trades": 0,
+      "successfulTrades": 0,
+      "failedTrades": 0,
+      "volumeKasWei": "0",
+      "gasSpentWei": "0",
+      "slippagesBps": [],
+      "arbAttempts": 0,
+      "profitableArbs": 0,
+      "arbNetKasWei": "0",
+      "lpCycles": 0,
+      "impermanentLossesBps": [],
+      "notes": [],
+      "startingValueKasWei": "0",
+      "endingValueKasWei": "0"
+    },
+    {
+      "role": "LP Manager",
+      "address": "0x4d83fab776dc39fAd992a409e072DE0883abe9E9",
+      "trades": 0,
+      "successfulTrades": 0,
+      "failedTrades": 0,
+      "volumeKasWei": "0",
+      "gasSpentWei": "0",
+      "slippagesBps": [],
+      "arbAttempts": 0,
+      "profitableArbs": 0,
+      "arbNetKasWei": "0",
+      "lpCycles": 0,
+      "impermanentLossesBps": [],
+      "notes": [],
+      "startingValueKasWei": "0",
+      "endingValueKasWei": "0"
+    }
+  ],
+  "vaultSnapshots": [],
+  "errors": []
+}
