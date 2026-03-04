@@ -13,6 +13,7 @@ interface ChainConfig {
   chainId: number;
   enabled: boolean;
   rpcUrl: string;
+  deployerKeyEnv: string; // env var name for this chain's deployer key
 
   // DEX contracts
   vaultAddress?: string;
@@ -52,19 +53,51 @@ export const CONFIG = {
   apiBaseUrl: 'https://dev-api-defi.kaspa.com',
   network: 'kasplex',
 
-  // Multi-chain config
+  // Multi-chain config — reads from prefixed env vars (IGRA_*, KASPLEX_*)
   chains: [
+    // IGRA Galleon Testnet — DEX + Aave
+    {
+      name: 'Galleon Testnet',
+      chainId: 38836,
+      enabled: !!(process.env.IGRA_RPC_URL || process.env.IGRA_VAULT_ADDRESS),
+      rpcUrl: process.env.IGRA_RPC_URL || 'https://galleon-testnet.igralabs.com:8545',
+      deployerKeyEnv: 'IGRA_DEPLOYER_PRIVATE_KEY',
+
+      // DEX contracts
+      vaultAddress: process.env.IGRA_VAULT_ADDRESS || '0xEB661B0baE5383c0789DF2C7FEc190C633c9D1c8',
+      routerAddress: process.env.IGRA_DEX_ROUTER || '0x47F80b6D7071B7738D6DD9d973D7515ce753e9d9',
+      factoryAddress: process.env.IGRA_DEX_FACTORY || '0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0',
+      wkasAddress: '0x394C68684F9AFCEb9b804531EF07a864E8081738',
+      pairs: [],
+
+      // Aave contracts
+      aaveContracts: {
+        pool: '0xb265EA393A9297472628E21575AE5c7E6458A1F2',
+        poolDataProvider: '0xc6b4592171EC79192f838E4050a2453D4D71fBAe',
+        oracle: '0x5B83681E48f365cfD2A4Ee29E2B699e38e04EbD9',
+      },
+
+      // Liquidation strategy
+      strategy: {
+        minProfitUsd: 50,
+        maxGasPriceGwei: 100,
+        healthFactorThreshold: 1.05,
+        maxPositionsToMonitor: 100,
+      },
+    },
+
     // Kasplex Testnet — DEX only (no Aave)
     {
       name: 'Kasplex Testnet',
       chainId: 167012,
-      enabled: true,
-      rpcUrl: process.env.RPC_URL || 'https://rpc.kasplextest.xyz',
+      enabled: !!(process.env.KASPLEX_RPC_URL || process.env.KASPLEX_VAULT_ADDRESS),
+      rpcUrl: process.env.KASPLEX_RPC_URL || 'https://rpc.kasplextest.xyz',
+      deployerKeyEnv: 'KASPLEX_DEPLOYER_PRIVATE_KEY',
 
       // DEX contracts
-      vaultAddress: process.env.VAULT_ADDRESS || '0x7edf75ceB2441d80aBC6599CeB4E62Eeb23BB2a9',
-      routerAddress: process.env.DEX_ROUTER || '0x81Cc4e7DbC652ec9168Bc2F4435C02d7F315148e',
-      factoryAddress: process.env.DEX_FACTORY || '0x89d5842017ceA7dd18D10EE6c679cE199d2aD99E',
+      vaultAddress: process.env.KASPLEX_VAULT_ADDRESS || '0x7edf75ceB2441d80aBC6599CeB4E62Eeb23BB2a9',
+      routerAddress: process.env.KASPLEX_DEX_ROUTER || '0x81Cc4e7DbC652ec9168Bc2F4435C02d7F315148e',
+      factoryAddress: process.env.KASPLEX_DEX_FACTORY || '0x89d5842017ceA7dd18D10EE6c679cE199d2aD99E',
       wkasAddress: '0xf40178040278E16c8813dB20a84119A605812FB3',
 
       // Top pairs
@@ -104,41 +137,23 @@ export const CONFIG = {
       // No Aave on Kasplex
       aaveContracts: null,
     },
-
-    // IGRA Galleon Testnet — DEX + Aave
-    {
-      name: 'Galleon Testnet',
-      chainId: 38836,
-      enabled: false,  // Flip to true to activate Galleon
-      rpcUrl: 'https://galleon-testnet.igralabs.com:8545',
-
-      // DEX contracts (if any - TBD)
-      vaultAddress: '0x983E517e872301828d5d35aD646929beC41bD54c',
-      routerAddress: '0xC69B228c4591508067c87bf78743080eE1270e2A',
-      factoryAddress: '0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0',
-      wkasAddress: '0x394C68684F9AFCEb9b804531EF07a864E8081738',
-      pairs: [],
-
-      // Aave contracts
-      aaveContracts: {
-        pool: '0xb265EA393A9297472628E21575AE5c7E6458A1F2',
-        poolDataProvider: '0xc6b4592171EC79192f838E4050a2453D4D71fBAe',
-        oracle: '0x5B83681E48f365cfD2A4Ee29E2B699e38e04EbD9',
-      },
-
-      // Liquidation strategy
-      strategy: {
-        minProfitUsd: 50,
-        maxGasPriceGwei: 100,
-        healthFactorThreshold: 1.05,
-        maxPositionsToMonitor: 100,
-      },
-    },
   ] as ChainConfig[],
 
-  // Active chain (default: Kasplex)
+  // Backward compat: also check legacy DEPLOYER_PRIVATE_KEY
+  getDeployerKey(chain: ChainConfig): string {
+    const key = process.env[chain.deployerKeyEnv] || process.env.DEPLOYER_PRIVATE_KEY;
+    if (!key) throw new Error(`${chain.deployerKeyEnv} (or DEPLOYER_PRIVATE_KEY) not set`);
+    return key;
+  },
+
+  // Active chains (all enabled)
+  get activeChains(): ChainConfig[] {
+    return this.chains.filter(c => c.enabled);
+  },
+
+  // First active chain (backward compat)
   get activeChain(): ChainConfig {
-    return this.chains.find(c => c.enabled) || this.chains[0];
+    return this.activeChains[0] || this.chains[0];
   },
 
   // Liquidation enabled? (true if any active chain has Aave)
@@ -155,4 +170,3 @@ export const CONFIG = {
 };
 
 export type { ChainConfig, PairConfig };
-
