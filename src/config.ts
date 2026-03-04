@@ -59,7 +59,7 @@ export const CONFIG = {
     {
       name: 'Galleon Testnet',
       chainId: 38836,
-      enabled: !!(process.env.IGRA_RPC_URL || process.env.IGRA_VAULT_ADDRESS),
+      enabled: !!(process.env.IGRA_DEPLOYER_PRIVATE_KEY),
       rpcUrl: process.env.IGRA_RPC_URL || 'https://galleon-testnet.igralabs.com:8545',
       deployerKeyEnv: 'IGRA_DEPLOYER_PRIVATE_KEY',
 
@@ -90,7 +90,7 @@ export const CONFIG = {
     {
       name: 'Kasplex Testnet',
       chainId: 167012,
-      enabled: !!(process.env.KASPLEX_RPC_URL || process.env.KASPLEX_VAULT_ADDRESS),
+      enabled: !!(process.env.KASPLEX_DEPLOYER_PRIVATE_KEY),
       rpcUrl: process.env.KASPLEX_RPC_URL || 'https://rpc.kasplextest.xyz',
       deployerKeyEnv: 'KASPLEX_DEPLOYER_PRIVATE_KEY',
 
