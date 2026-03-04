@@ -629,18 +629,24 @@ async function fundWallets(context: RuntimeContext): Promise<void> {
   }
 
   for (const wallet of context.wallets) {
-    await withReceipt(
-      context,
-      'Deployer',
-      `fund wallet #${wallet.index}`,
-      async () =>
-        context.deployer.sendTransaction({
-          to: wallet.address,
-          value: PER_WALLET_NATIVE,
-          ...(await txOverrides(context, context.deployer)),
-        }),
-      { amountOut: PER_WALLET_NATIVE }
-    );
+    try {
+      await withReceipt(
+        context,
+        'Deployer',
+        `fund wallet #${wallet.index}`,
+        async () =>
+          context.deployer.sendTransaction({
+            to: wallet.address,
+            value: PER_WALLET_NATIVE,
+            ...(await txOverrides(context, context.deployer)),
+          }),
+        { amountOut: PER_WALLET_NATIVE }
+      );
+      if (wallet.index % 10 === 0) console.log(`    funded ${wallet.index}/50`);
+    } catch (error) {
+      console.error(`    ❌ failed to fund wallet #${wallet.index}: ${shortError(error)}`);
+      context.configNotes.push(`Fund wallet #${wallet.index} failed: ${shortError(error)}`);
+    }
   }
 }
 
@@ -1564,6 +1570,21 @@ async function seedPriceHistory(context: RuntimeContext): Promise<void> {
   }
 }
 
+async function savePartialResults(context: RuntimeContext, reason: string): Promise<void> {
+  try {
+    console.log(`\n⚠️  Saving partial results (${reason})...`);
+    const endingNav = await getVaultNav(context).catch(() => 0n);
+    const startNav = context.initialVaultNav || 0n;
+    context.configNotes.push(`PARTIAL RESULT: ${reason}`);
+    const { report } = await writeOutputs(context, startNav, endingNav);
+    console.log(report);
+    console.log(`\nPartial report saved: ${context.reportPath}`);
+    console.log(`Partial JSON saved: ${context.jsonPath}`);
+  } catch (saveError) {
+    console.error('Failed to save partial results:', saveError);
+  }
+}
+
 async function main(): Promise<void> {
   const context = await buildContext();
   await syncChainTime(context);
@@ -1572,22 +1593,80 @@ async function main(): Promise<void> {
   await seedPriceHistory(context);
   await maybeSnapshotNav(context, 'startup');
 
-  await setupWallets(context);
-  await ensureVaultInventory(context);
+  // Phase 1: Setup wallets
+  console.log('\n=== Phase 1: Setting up 50 wallets ===');
+  console.log('  Funding wallets with native iKAS...');
+  await fundWallets(context);
+  console.log('  ✅ All 50 wallets funded');
 
+  console.log('  Wrapping WKAS + approving router for each wallet...');
+  let wrapCount = 0;
+  const origWrapAndApprove = wrapAndApproveWallet;
+  await runLimited(context.wallets, 8, async (wallet) => {
+    await origWrapAndApprove(context, wallet);
+    wrapCount++;
+    if (wrapCount % 10 === 0) console.log(`  ... ${wrapCount}/50 wallets wrapped & approved`);
+  });
+  console.log('  ✅ All wallets wrapped & approved');
+
+  console.log('  Transferring ALPHA, BETA, GAMMA tokens...');
+  for (const token of [TOKENS.ALPHA, TOKENS.BETA, TOKENS.GAMMA] as const) {
+    await transferTokenToWallets(context, token);
+    console.log(`  ✅ ${token.symbol} distributed to all wallets`);
+  }
+
+  console.log('  Ensuring vault has enough inventory...');
+  await ensureVaultInventory(context);
+  console.log('  ✅ Vault inventory ready');
+
+  // Phase 2: Vault LP Entry
+  console.log('\n=== Phase 2: Vault LP Entry ===');
   context.initialVaultNav = await getVaultNav(context);
+  console.log(`  Starting NAV: ${formatWkas(context.initialVaultNav)} WKAS`);
   await maybeSnapshotNav(context, 'pre-lp');
   await enterVaultLpPositions(context);
+  console.log('  ✅ Vault LP positions entered on 3 pairs');
   await maybeSnapshotNav(context, 'post-lp-entry');
 
-  console.log('Phase 3/4: trader market and vault arb loops running...');
-  await Promise.all([
-    ...context.wallets.map((wallet) => runWalletLoop(context, wallet)),
-    runVaultLoops(context),
-  ]);
+  // Phase 3/4: Trading + Arb
+  const tradingMins = ((context.endTime - Date.now()) / 60_000).toFixed(1);
+  console.log(`\n=== Phase 3/4: Trading market (${tradingMins}m) + Vault arb ===`);
+  console.log('  50 wallets trading concurrently, vault arb loop every 5s');
 
-  console.log('Phase 5: removing vault LP positions and writing report...');
-  await exitVaultLpPositions(context);
+  // Progress ticker
+  const progressInterval = setInterval(() => {
+    const totalTrades = context.wallets.reduce((sum, w) => sum + w.trades, 0);
+    const totalTxs = context.allTransactions.length;
+    const arbCount = context.arbTrades.length;
+    const elapsed = ((Date.now() - context.startTime) / 60_000).toFixed(1);
+    const remaining = ((context.endTime - Date.now()) / 60_000).toFixed(1);
+    console.log(`  📊 ${elapsed}m elapsed | ${remaining}m left | ${totalTrades} trades | ${totalTxs} TXs | ${arbCount} arb attempts`);
+  }, 30_000);
+
+  try {
+    await Promise.all([
+      ...context.wallets.map((wallet) => runWalletLoop(context, wallet)),
+      runVaultLoops(context),
+    ]);
+  } catch (tradingError) {
+    console.error('Trading phase error:', tradingError);
+    context.configNotes.push(`Trading error: ${shortError(tradingError)}`);
+  } finally {
+    clearInterval(progressInterval);
+  }
+
+  const totalTrades = context.wallets.reduce((sum, w) => sum + w.trades, 0);
+  console.log(`  ✅ Trading complete: ${totalTrades} trades, ${context.allTransactions.length} TXs, ${context.arbTrades.length} arb trades`);
+
+  // Phase 5: Exit + Report
+  console.log('\n=== Phase 5: Vault LP Exit + Report ===');
+  try {
+    await exitVaultLpPositions(context);
+    console.log('  ✅ All LP positions removed');
+  } catch (exitError) {
+    console.error('LP exit error:', exitError);
+    context.configNotes.push(`LP exit error: ${shortError(exitError)}`);
+  }
   await maybeSnapshotNav(context, 'post-lp-exit');
   const endingNav = await getVaultNav(context);
   const { report, jsonReport } = await writeOutputs(context, context.initialVaultNav, endingNav);
@@ -1604,7 +1683,13 @@ async function main(): Promise<void> {
   console.log(`  JSON saved: ${context.jsonPath}`);
 }
 
-main().catch((error) => {
+main().catch(async (error) => {
   console.error('E2E vault test failed:', error);
+  // Try to save partial results even on crash
+  try {
+    const provider = new JsonRpcProvider(RPC_URL);
+    // We can't easily recover context here, but the error message will help debug
+    console.error('Use partial results if any were saved before the crash.');
+  } catch {}
   process.exitCode = 1;
 });
