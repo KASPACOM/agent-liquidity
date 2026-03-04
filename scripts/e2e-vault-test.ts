@@ -445,7 +445,14 @@ async function withReceipt(
   } = {}
 ): Promise<any> {
   const tx = await send();
-  const receipt = await tx.wait();
+  console.log(`      TX sent: ${tx.hash}`);
+  
+  // Add timeout to tx.wait()
+  const timeoutPromise = new Promise<never>((_, reject) => 
+    setTimeout(() => reject(new Error('Transaction confirmation timeout after 60s')), 60_000)
+  );
+  
+  const receipt = await Promise.race([tx.wait(), timeoutPromise]);
   const block = await context.provider.getBlock(receipt.blockNumber);
   context.allTransactions.push({
     wallet: walletLabel,
@@ -509,14 +516,26 @@ async function maybeReadBigInt(
 
 async function maybeSnapshotNav(context: RuntimeContext, note: string): Promise<void> {
   try {
+    console.log(`    Attempting snapshotNAV (${note})...`);
     const vault = context.vault.connect(context.vaultRunner) as AnyContract;
-    await withReceipt(
-      context,
-      'Vault',
-      `snapshotNAV (${note})`,
-      async () => vault['snapshotNAV'](await txOverrides(context, context.vaultRunner))
+    
+    // Add a timeout wrapper
+    const timeoutPromise = new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error('snapshotNAV timeout after 30s')), 30_000)
     );
+    
+    await Promise.race([
+      withReceipt(
+        context,
+        'Vault',
+        `snapshotNAV (${note})`,
+        async () => vault['snapshotNAV'](await txOverrides(context, context.vaultRunner))
+      ),
+      timeoutPromise
+    ]);
+    console.log(`    ✓ snapshotNAV (${note}) complete`);
   } catch (error) {
+    console.log(`    ⚠️  snapshotNAV (${note}) failed or timed out: ${shortError(error)}`);
     context.configNotes.push(`snapshotNAV failed (${note}): ${shortError(error)}`);
   }
 }
@@ -796,10 +815,14 @@ async function ensureVaultInventory(context: RuntimeContext): Promise<void> {
 async function enterVaultLpPositions(context: RuntimeContext): Promise<void> {
   const vault = context.vault.connect(context.vaultRunner) as AnyContract;
   for (const pair of PAIRS) {
+    console.log(`  Processing ${pair.key} LP entry...`);
     const before = await readPairSnapshot(context, pair);
+    console.log(`    Reserve snapshot: ${formatToken(before.reserveToken, pair.token.decimals)} ${pair.token.symbol}, ${formatWkas(before.reserveWkas)} WKAS`);
     const vaultTokenBefore = await getVaultTokenBalance(context, pair.token.address);
     const vaultWkasBefore = await getVaultTokenBalance(context, ADDRESSES.wkas);
     const desiredToken = (pair.lpTargetWkas * before.reserveToken) / before.reserveWkas;
+    console.log(`    Vault balances before: ${formatToken(vaultTokenBefore, pair.token.decimals)} ${pair.token.symbol}, ${formatWkas(vaultWkasBefore)} WKAS`);
+    console.log(`    Adding liquidity: ${formatToken(desiredToken, pair.token.decimals)} ${pair.token.symbol} + ${formatWkas(pair.lpTargetWkas)} WKAS...`);
     const receipt = await withReceipt(
       context,
       'Vault',
@@ -817,6 +840,7 @@ async function enterVaultLpPositions(context: RuntimeContext): Promise<void> {
         ),
       { pair: pair.key, amountIn: desiredToken, amountOut: pair.lpTargetWkas }
     );
+    console.log(`    ✓ LP entry TX: ${explorerTx(receipt.hash)}`);
 
     const pairContract = getPairContract(context, pair.key);
     const lpBalance = BigInt(await pairContract['balanceOf'](ADDRESSES.vault));
@@ -1577,8 +1601,10 @@ async function printStartupSummary(context: RuntimeContext): Promise<void> {
 
 async function seedPriceHistory(context: RuntimeContext): Promise<void> {
   for (const pair of PAIRS) {
+    console.log(`  Reading ${pair.key} snapshot...`);
     const snapshot = await readPairSnapshot(context, pair);
     context.priceHistory.set(pair.key, [snapshot.priceWkasPerToken]);
+    console.log(`  ✓ ${pair.key}: ${snapshot.priceWkasPerToken.toFixed(8)}`);
   }
 }
 
@@ -1600,31 +1626,43 @@ async function savePartialResults(context: RuntimeContext, reason: string): Prom
 async function main(): Promise<void> {
   const context = await buildContext();
   await syncChainTime(context);
+  console.log('✓ Chain time synced');
   await validateChain(context);
+  console.log('✓ Chain validated');
   await printStartupSummary(context);
+  console.log('✓ Seeding price history...');
   await seedPriceHistory(context);
+  console.log('✓ Price history seeded');
+  console.log('✓ Snapshotting NAV at startup...');
   await maybeSnapshotNav(context, 'startup');
+  console.log('✓ NAV snapshot complete');
 
-  // Phase 1: Setup wallets
-  console.log('\n=== Phase 1: Setting up 50 wallets ===');
-  console.log('  Funding wallets with native iKAS...');
-  await fundWallets(context);
-  console.log('  ✅ All 50 wallets funded');
+  // Phase 1: Setup wallets (skippable via SKIP_WALLET_SETUP env var)
+  const skipWalletSetup = process.env.SKIP_WALLET_SETUP === 'true';
+  if (skipWalletSetup) {
+    console.log('\n=== Phase 1: SKIPPED (SKIP_WALLET_SETUP=true) ===');
+    console.log('  Assuming wallets are already funded and approved');
+  } else {
+    console.log('\n=== Phase 1: Setting up 50 wallets ===');
+    console.log('  Funding wallets with native iKAS...');
+    await fundWallets(context);
+    console.log('  ✅ All 50 wallets funded');
 
-  console.log('  Wrapping WKAS + approving router for each wallet...');
-  let wrapCount = 0;
-  const origWrapAndApprove = wrapAndApproveWallet;
-  await runLimited(context.wallets, 8, async (wallet) => {
-    await origWrapAndApprove(context, wallet);
-    wrapCount++;
-    if (wrapCount % 10 === 0) console.log(`  ... ${wrapCount}/50 wallets wrapped & approved`);
-  });
-  console.log('  ✅ All wallets wrapped & approved');
+    console.log('  Wrapping WKAS + approving router for each wallet...');
+    let wrapCount = 0;
+    const origWrapAndApprove = wrapAndApproveWallet;
+    await runLimited(context.wallets, 8, async (wallet) => {
+      await origWrapAndApprove(context, wallet);
+      wrapCount++;
+      if (wrapCount % 10 === 0) console.log(`  ... ${wrapCount}/50 wallets wrapped & approved`);
+    });
+    console.log('  ✅ All wallets wrapped & approved');
 
-  console.log('  Transferring ALPHA, BETA, GAMMA tokens...');
-  for (const token of [TOKENS.ALPHA, TOKENS.BETA, TOKENS.GAMMA] as const) {
-    await transferTokenToWallets(context, token);
-    console.log(`  ✅ ${token.symbol} distributed to all wallets`);
+    console.log('  Transferring ALPHA, BETA, GAMMA tokens...');
+    for (const token of [TOKENS.ALPHA, TOKENS.BETA, TOKENS.GAMMA] as const) {
+      await transferTokenToWallets(context, token);
+      console.log(`  ✅ ${token.symbol} distributed to all wallets`);
+    }
   }
 
   console.log('  Ensuring vault has enough inventory...');
@@ -1636,8 +1674,16 @@ async function main(): Promise<void> {
   context.initialVaultNav = await getVaultNav(context);
   console.log(`  Starting NAV: ${formatWkas(context.initialVaultNav)} WKAS`);
   await maybeSnapshotNav(context, 'pre-lp');
-  await enterVaultLpPositions(context);
-  console.log('  ✅ Vault LP positions entered on 3 pairs');
+  
+  try {
+    await enterVaultLpPositions(context);
+    console.log('  ✅ Vault LP positions entered on 3 pairs');
+  } catch (lpError) {
+    console.error(`  ❌ LP entry failed: ${shortError(lpError)}`);
+    context.configNotes.push(`LP entry failed: ${shortError(lpError)}`);
+    console.log('  Continuing to trading phase anyway...');
+  }
+  
   await maybeSnapshotNav(context, 'post-lp-entry');
 
   // Phase 3/4: Trading + Arb
