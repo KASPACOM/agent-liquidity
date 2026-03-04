@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm ci
 COPY src/ ./src/
 COPY tsconfig.json ./
-RUN npx tsc
+RUN npx tsc && npx fix-esm-import-path dist/
 
 FROM node:20-alpine
 WORKDIR /app
