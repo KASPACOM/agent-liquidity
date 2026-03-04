@@ -50,14 +50,12 @@ class AgentLiquidityManager {
   async initialize() {
     console.log('🎯 Initializing Agent Liquidity Manager...');
 
-    // Load private key from env (OPSEC: never log or persist)
-    const key = process.env.DEPLOYER_PRIVATE_KEY;
-    if (!key) throw new Error('DEPLOYER_PRIVATE_KEY not set');
-
-    const account = privateKeyToAccount(key as `0x${string}`);
-
     // Initialize for active chain
     const activeChain = CONFIG.activeChain;
+
+    // Load private key from env (OPSEC: never log or persist)
+    const key = CONFIG.getDeployerKey(activeChain);
+    const account = privateKeyToAccount(key as `0x${string}`);
     const chainConfig = getChainConfig(
       activeChain.chainId,
       activeChain.rpcUrl,
