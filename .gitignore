@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-# package-lock.json — committed for CI reproducibility
 
 # Build outputs
 dist/
@@ -24,6 +23,7 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
 
 # Stress test artifacts
 stress-test-results/

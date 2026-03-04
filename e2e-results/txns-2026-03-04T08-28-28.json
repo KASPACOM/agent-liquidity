@@ -1,0 +1,452 @@
+{
+  "metadata": {
+    "startTime": "2026-03-04T08:28:28.841Z",
+    "endTime": "2026-03-04T08:31:31.196Z",
+    "duration": 182355,
+    "network": "Galleon Testnet",
+    "vault": "0xEB661B0baE5383c0789DF2C7FEc190C633c9D1c8",
+    "router": "0x47F80b6D7071B7738D6DD9d973D7515ce753e9d9"
+  },
+  "vaultPnL": {
+    "startingNAV": "7632689552755718170790",
+    "endingNAV": "7632689552755718170790",
+    "netPnL": "0",
+    "pnlPercent": 0,
+    "lpIncome": [],
+    "arbTrades": [],
+    "gasCost": "0"
+  },
+  "market": {
+    "totalTrades": 0,
+    "totalVolume": "0",
+    "pairs": [
+      {
+        "name": "ALPHA/WKAS",
+        "trades": 0,
+        "volumeWKAS": "0",
+        "priceStart": 0.010180010960191537,
+        "priceEnd": 0.010180010960191537,
+        "priceChange": 0
+      },
+      {
+        "name": "BETA/WKAS",
+        "trades": 0,
+        "volumeWKAS": "0",
+        "priceStart": 0.01,
+        "priceEnd": 0.01,
+        "priceChange": 0
+      },
+      {
+        "name": "GAMMA/WKAS",
+        "trades": 0,
+        "volumeWKAS": "0",
+        "priceStart": 0.000018181818181818182,
+        "priceEnd": 0.000018181818181818182,
+        "priceChange": 0
+      }
+    ]
+  },
+  "wallets": [
+    {
+      "index": 1,
+      "role": "Random Trader",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 2,
+      "role": "Random Trader",
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 3,
+      "role": "Random Trader",
+      "address": "0x90F79bf6EB2c4f870365E785982E1f101E93b906",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 4,
+      "role": "Random Trader",
+      "address": "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 5,
+      "role": "Random Trader",
+      "address": "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 6,
+      "role": "Random Trader",
+      "address": "0x976EA74026E726554dB657fA54763abd0C3a0aa9",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 7,
+      "role": "Random Trader",
+      "address": "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 8,
+      "role": "Random Trader",
+      "address": "0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 9,
+      "role": "Random Trader",
+      "address": "0xa0Ee7A142d267C1f36714E4a8F75612F20a79720",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 10,
+      "role": "Random Trader",
+      "address": "0xBcd4042DE499D14e55001CcbB24a551F3b954096",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 11,
+      "role": "Random Trader",
+      "address": "0x71bE63f3384f5fb98995898A86B02Fb2426c5788",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 12,
+      "role": "Random Trader",
+      "address": "0xFABB0ac9d68B0B445fB7357272Ff202C5651694a",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 13,
+      "role": "Random Trader",
+      "address": "0x1CBd3b2770909D4e10f157cABC84C7264073C9Ec",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 14,
+      "role": "Random Trader",
+      "address": "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 15,
+      "role": "Random Trader",
+      "address": "0xcd3B766CCDd6AE721141F452C550Ca635964ce71",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 16,
+      "role": "Random Trader",
+      "address": "0x2546BcD3c84621e976D8185a91A922aE77ECEc30",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 17,
+      "role": "Random Trader",
+      "address": "0xbDA5747bFD65F08deb54cb465eB87D40e51B197E",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 18,
+      "role": "Random Trader",
+      "address": "0xdD2FD4581271e230360230F9337D5c0430Bf44C0",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 19,
+      "role": "Random Trader",
+      "address": "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 20,
+      "role": "Random Trader",
+      "address": "0x09DB0a93B389bEF724429898f539AEB7ac2Dd55f",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 21,
+      "role": "Trend Follower",
+      "address": "0x02484cb50AAC86Eae85610D6f4Bf026f30f6627D",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 22,
+      "role": "Trend Follower",
+      "address": "0x08135Da0A343E492FA2d4282F2AE34c6c5CC1BbE",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 23,
+      "role": "Trend Follower",
+      "address": "0x5E661B79FE2D3F6cE70F5AAC07d8Cd9abb2743F1",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 24,
+      "role": "Trend Follower",
+      "address": "0x61097BA76cD906d2ba4FD106E757f7Eb455fc295",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 25,
+      "role": "Trend Follower",
+      "address": "0xDf37F81dAAD2b0327A0A50003740e1C935C70913",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 26,
+      "role": "Trend Follower",
+      "address": "0x553BC17A05702530097c3677091C5BB47a3a7931",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 27,
+      "role": "Trend Follower",
+      "address": "0x87BdCE72c06C21cd96219BD8521bDF1F42C78b5e",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 28,
+      "role": "Trend Follower",
+      "address": "0x40Fc963A729c542424cD800349a7E4Ecc4896624",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 29,
+      "role": "Trend Follower",
+      "address": "0x9DCCe783B6464611f38631e6C851bf441907c710",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 30,
+      "role": "Trend Follower",
+      "address": "0x1BcB8e569EedAb4668e55145Cfeaf190902d3CF2",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 31,
+      "role": "Trend Follower",
+      "address": "0x8263Fce86B1b78F95Ab4dae11907d8AF88f841e7",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 32,
+      "role": "Trend Follower",
+      "address": "0xcF2d5b3cBb4D7bF04e3F7bFa8e27081B52191f91",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 33,
+      "role": "Trend Follower",
+      "address": "0x86c53Eb85D0B7548fea5C4B4F82b4205C8f6Ac18",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 34,
+      "role": "Trend Follower",
+      "address": "0x1aac82773CB722166D7dA0d5b0FA35B0307dD99D",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 35,
+      "role": "Trend Follower",
+      "address": "0x2f4f06d218E426344CFE1A83D53dAd806994D325",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 36,
+      "role": "Mean Reverter",
+      "address": "0x1003ff39d25F2Ab16dBCc18EcE05a9B6154f65F4",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 37,
+      "role": "Mean Reverter",
+      "address": "0x9eAF5590f2c84912A08de97FA28d0529361Deb9E",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 38,
+      "role": "Mean Reverter",
+      "address": "0x11e8F3eA3C6FcF12EcfF2722d75CEFC539c51a1C",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 39,
+      "role": "Mean Reverter",
+      "address": "0x7D86687F980A56b832e9378952B738b614A99dc6",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 40,
+      "role": "Mean Reverter",
+      "address": "0x9eF6c02FB2ECc446146E05F1fF687a788a8BF76d",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 41,
+      "role": "Mean Reverter",
+      "address": "0x08A2DE6F3528319123b25935C92888B16db8913E",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 42,
+      "role": "Mean Reverter",
+      "address": "0xe141C82D99D85098e03E1a1cC1CdE676556fDdE0",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 43,
+      "role": "Mean Reverter",
+      "address": "0x4b23D303D9e3719D6CDf8d172Ea030F80509ea15",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 44,
+      "role": "Mean Reverter",
+      "address": "0xC004e69C5C04A223463Ff32042dd36DabF63A25a",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 45,
+      "role": "Mean Reverter",
+      "address": "0x5eb15C0992734B5e77c888D713b4FC67b3D679A2",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 46,
+      "role": "Whale",
+      "address": "0x7Ebb637fd68c523613bE51aad27C35C4DB199B9c",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 47,
+      "role": "Whale",
+      "address": "0x3c3E2E178C69D4baD964568415a0f0c84fd6320A",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 48,
+      "role": "Whale",
+      "address": "0x35304262b9E87C00c430149f28dD154995d01207",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 49,
+      "role": "Whale",
+      "address": "0xD4A1E660C916855229e1712090CcfD8a424A2E33",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    },
+    {
+      "index": 50,
+      "role": "Whale",
+      "address": "0xEe7f6A930B29d7350498Af97f0F9672EaecbeeFf",
+      "trades": 0,
+      "volume": "0",
+      "txHashes": []
+    }
+  ],
+  "allTransactions": []
+}

@@ -1,0 +1,92 @@
+═══════════════════════════════════════════════════
+    E2E VAULT TEST REPORT — IGRA Galleon
+═══════════════════════════════════════════════════
+Duration: 0.50m
+Network: Galleon Testnet (38836)
+Vault: 0xEB661B0baE5383c0789DF2C7FEc190C633c9D1c8
+Router: 0x47F80b6D7071B7738D6DD9d973D7515ce753e9d9
+Wallets: 50
+
+VAULT P&L:
+  Starting NAV: 7632.68955275571817079 WKAS
+  Ending NAV: 7632.68955275571817079 WKAS
+  Net P&L: +0.0 WKAS (0.00%)
+
+  LP Income:
+
+  Arbitrage:
+    Total arb trades: 0
+    Profitable: 0
+    Total arb profit: +0.0 WKAS
+    Best trade: n/a
+
+    Arb Log:
+
+  Gas spent: 0.0 iKAS
+
+MARKET OVERVIEW:
+  Total trades across all wallets: 0
+  Total volume: 0 WKAS equivalent
+
+  Pair Stats:
+    ALPHA/WKAS: 0 trades | 0.01018001 -> 0.01018001 | 0 WKAS
+    BETA/WKAS: 0 trades | 0.01000000 -> 0.01000000 | 0 WKAS
+    GAMMA/WKAS: 0 trades | 0.00001818 -> 0.00001818 | 0 WKAS
+
+WALLET BREAKDOWN:
+  Wallet #1 (Random Trader): 0 trades | 0.0 WKAS volume | 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+  Wallet #2 (Random Trader): 0 trades | 0.0 WKAS volume | 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC
+  Wallet #3 (Random Trader): 0 trades | 0.0 WKAS volume | 0x90F79bf6EB2c4f870365E785982E1f101E93b906
+  Wallet #4 (Random Trader): 0 trades | 0.0 WKAS volume | 0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65
+  Wallet #5 (Random Trader): 0 trades | 0.0 WKAS volume | 0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc
+  Wallet #6 (Random Trader): 0 trades | 0.0 WKAS volume | 0x976EA74026E726554dB657fA54763abd0C3a0aa9
+  Wallet #7 (Random Trader): 0 trades | 0.0 WKAS volume | 0x14dC79964da2C08b23698B3D3cc7Ca32193d9955
+  Wallet #8 (Random Trader): 0 trades | 0.0 WKAS volume | 0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f
+  Wallet #9 (Random Trader): 0 trades | 0.0 WKAS volume | 0xa0Ee7A142d267C1f36714E4a8F75612F20a79720
+  Wallet #10 (Random Trader): 0 trades | 0.0 WKAS volume | 0xBcd4042DE499D14e55001CcbB24a551F3b954096
+  Wallet #11 (Random Trader): 0 trades | 0.0 WKAS volume | 0x71bE63f3384f5fb98995898A86B02Fb2426c5788
+  Wallet #12 (Random Trader): 0 trades | 0.0 WKAS volume | 0xFABB0ac9d68B0B445fB7357272Ff202C5651694a
+  Wallet #13 (Random Trader): 0 trades | 0.0 WKAS volume | 0x1CBd3b2770909D4e10f157cABC84C7264073C9Ec
+  Wallet #14 (Random Trader): 0 trades | 0.0 WKAS volume | 0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097
+  Wallet #15 (Random Trader): 0 trades | 0.0 WKAS volume | 0xcd3B766CCDd6AE721141F452C550Ca635964ce71
+  Wallet #16 (Random Trader): 0 trades | 0.0 WKAS volume | 0x2546BcD3c84621e976D8185a91A922aE77ECEc30
+  Wallet #17 (Random Trader): 0 trades | 0.0 WKAS volume | 0xbDA5747bFD65F08deb54cb465eB87D40e51B197E
+  Wallet #18 (Random Trader): 0 trades | 0.0 WKAS volume | 0xdD2FD4581271e230360230F9337D5c0430Bf44C0
+  Wallet #19 (Random Trader): 0 trades | 0.0 WKAS volume | 0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199
+  Wallet #20 (Random Trader): 0 trades | 0.0 WKAS volume | 0x09DB0a93B389bEF724429898f539AEB7ac2Dd55f
+  Wallet #21 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x02484cb50AAC86Eae85610D6f4Bf026f30f6627D
+  Wallet #22 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x08135Da0A343E492FA2d4282F2AE34c6c5CC1BbE
+  Wallet #23 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x5E661B79FE2D3F6cE70F5AAC07d8Cd9abb2743F1
+  Wallet #24 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x61097BA76cD906d2ba4FD106E757f7Eb455fc295
+  Wallet #25 (Trend Follower): 0 trades | 0.0 WKAS volume | 0xDf37F81dAAD2b0327A0A50003740e1C935C70913
+  Wallet #26 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x553BC17A05702530097c3677091C5BB47a3a7931
+  Wallet #27 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x87BdCE72c06C21cd96219BD8521bDF1F42C78b5e
+  Wallet #28 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x40Fc963A729c542424cD800349a7E4Ecc4896624
+  Wallet #29 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x9DCCe783B6464611f38631e6C851bf441907c710
+  Wallet #30 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x1BcB8e569EedAb4668e55145Cfeaf190902d3CF2
+  Wallet #31 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x8263Fce86B1b78F95Ab4dae11907d8AF88f841e7
+  Wallet #32 (Trend Follower): 0 trades | 0.0 WKAS volume | 0xcF2d5b3cBb4D7bF04e3F7bFa8e27081B52191f91
+  Wallet #33 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x86c53Eb85D0B7548fea5C4B4F82b4205C8f6Ac18
+  Wallet #34 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x1aac82773CB722166D7dA0d5b0FA35B0307dD99D
+  Wallet #35 (Trend Follower): 0 trades | 0.0 WKAS volume | 0x2f4f06d218E426344CFE1A83D53dAd806994D325
+  Wallet #36 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0x1003ff39d25F2Ab16dBCc18EcE05a9B6154f65F4
+  Wallet #37 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0x9eAF5590f2c84912A08de97FA28d0529361Deb9E
+  Wallet #38 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0x11e8F3eA3C6FcF12EcfF2722d75CEFC539c51a1C
+  Wallet #39 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0x7D86687F980A56b832e9378952B738b614A99dc6
+  Wallet #40 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0x9eF6c02FB2ECc446146E05F1fF687a788a8BF76d
+  Wallet #41 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0x08A2DE6F3528319123b25935C92888B16db8913E
+  Wallet #42 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0xe141C82D99D85098e03E1a1cC1CdE676556fDdE0
+  Wallet #43 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0x4b23D303D9e3719D6CDf8d172Ea030F80509ea15
+  Wallet #44 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0xC004e69C5C04A223463Ff32042dd36DabF63A25a
+  Wallet #45 (Mean Reverter): 0 trades | 0.0 WKAS volume | 0x5eb15C0992734B5e77c888D713b4FC67b3D679A2
+  Wallet #46 (Whale): 0 trades | 0.0 WKAS volume | 0x7Ebb637fd68c523613bE51aad27C35C4DB199B9c
+  Wallet #47 (Whale): 0 trades | 0.0 WKAS volume | 0x3c3E2E178C69D4baD964568415a0f0c84fd6320A
+  Wallet #48 (Whale): 0 trades | 0.0 WKAS volume | 0x35304262b9E87C00c430149f28dD154995d01207
+  Wallet #49 (Whale): 0 trades | 0.0 WKAS volume | 0xD4A1E660C916855229e1712090CcfD8a424A2E33
+  Wallet #50 (Whale): 0 trades | 0.0 WKAS volume | 0xEe7f6A930B29d7350498Af97f0F9672EaecbeeFf
+
+TOP 10 TRANSACTIONS BY VALUE:
+
+ALL VAULT TRANSACTIONS:
+
+NOTES: snapshotNAV failed (startup): snapshotNAV timeout after 30s | snapshotNAV failed (pre-lp): snapshotNAV timeout after 30s | LP entry failed: Transaction confirmation timeout after 60s | snapshotNAV failed (post-lp-entry): snapshotNAV timeout after 30s | snapshotNAV failed (post-lp-exit): snapshotNAV timeout after 30s
