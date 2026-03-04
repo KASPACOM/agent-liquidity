@@ -630,6 +630,11 @@ async function fundWallets(context: RuntimeContext): Promise<void> {
 
   for (const wallet of context.wallets) {
     try {
+      const existingBalance = await context.provider.getBalance(wallet.address);
+      if (existingBalance >= PER_WALLET_NATIVE / 2n) {
+        if (wallet.index % 10 === 0) console.log(`    wallet #${wallet.index} already funded (${formatWkas(existingBalance)} iKAS), skipping`);
+        continue;
+      }
       await withReceipt(
         context,
         'Deployer',
@@ -652,16 +657,19 @@ async function fundWallets(context: RuntimeContext): Promise<void> {
 
 async function wrapAndApproveWallet(context: RuntimeContext, wallet: WalletContext): Promise<void> {
   const wkas = context.wkas.connect(wallet.wallet) as AnyContract;
-  await withReceipt(
-    context,
-    `Wallet #${wallet.index}`,
-    'wrap WKAS',
-    async () =>
-      wkas['deposit']({
-        ...(await txOverrides(context, wallet.wallet, { value: PER_WALLET_WRAP })),
-      }),
-    { amountIn: PER_WALLET_WRAP, amountOut: PER_WALLET_WRAP }
-  );
+  const existingWkas = BigInt(await context.wkas['balanceOf'](wallet.address));
+  if (existingWkas < PER_WALLET_WRAP / 2n) {
+    await withReceipt(
+      context,
+      `Wallet #${wallet.index}`,
+      'wrap WKAS',
+      async () =>
+        wkas['deposit']({
+          ...(await txOverrides(context, wallet.wallet, { value: PER_WALLET_WRAP })),
+        }),
+      { amountIn: PER_WALLET_WRAP, amountOut: PER_WALLET_WRAP }
+    );
+  }
 
   for (const token of Object.values(TOKENS)) {
     await approveIfNeeded(
@@ -684,6 +692,10 @@ async function transferTokenToWallets(
   }
   const contract = context.tokenContracts[token.symbol as TokenSymbol].connect(context.tokenDeployer) as AnyContract;
   for (const wallet of context.wallets) {
+    const existingBal = BigInt(await contract['balanceOf'](wallet.address));
+    if (existingBal >= token.fundingAmount / 2n) {
+      continue;
+    }
     await withReceipt(
       context,
       'Token Deployer',
