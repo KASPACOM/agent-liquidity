@@ -25,4 +25,6 @@ Thumbs.db
 *.swo
 
 
-data/
+# Stress test artifacts
+stress-test-results/
+e2e-results/
