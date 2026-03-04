@@ -115,7 +115,7 @@ const WKAS_ABI = [
 ] as const;
 
 const TX_OVERRIDES = {
-  type: 'legacy' as const,
+  type: 0,
   gasPrice: 2_000_000_000_000n,
   gasLimit: 3_000_000n,
 };
