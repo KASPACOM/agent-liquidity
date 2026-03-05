@@ -64,7 +64,7 @@ export const CONFIG = {
       deployerKeyEnv: 'IGRA_DEPLOYER_PRIVATE_KEY',
 
       // DEX contracts
-      vaultAddress: process.env.IGRA_VAULT_ADDRESS || '0xEB661B0baE5383c0789DF2C7FEc190C633c9D1c8',
+      vaultAddress: process.env.IGRA_VAULT_ADDRESS || '0xa3ED9723EbCb88916b1f80c3988A13a49cd372E5',
       routerAddress: process.env.IGRA_DEX_ROUTER || '0x47F80b6D7071B7738D6DD9d973D7515ce753e9d9',
       factoryAddress: process.env.IGRA_DEX_FACTORY || '0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0',
       wkasAddress: '0x394C68684F9AFCEb9b804531EF07a864E8081738',
