@@ -1,5 +1,6 @@
 import { createWalletClient, http, publicActions } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { createServer } from 'http';
 import { CONFIG } from './config';
 import { ViemEVMWalletClient } from '@goat-sdk/wallet-viem';
 import { kaspaComDex } from './plugins/kaspacom-dex';
@@ -40,6 +41,12 @@ class AgentLiquidityManager {
 
   // Liquidation
   private liquidationStrategy?: StrategyManager;
+
+  // Health tracking
+  private lastCycleAt: Date | null = null;
+  private cycleCount = 0;
+  private lastError: string | null = null;
+  private startedAt = new Date();
 
   constructor() {
     if (CONFIG.liquidationEnabled) {
@@ -107,6 +114,46 @@ class AgentLiquidityManager {
     }
 
     console.log(`\n⏱️  Check interval: ${CONFIG.checkIntervalMs / 1000}s\n`);
+
+    // Start health server
+    this.startHealthServer();
+  }
+
+  private startHealthServer() {
+    const port = parseInt(process.env.HEALTH_PORT || '3003', 10);
+    const server = createServer((req, res) => {
+      if (req.url === '/health' || req.url === '/healthz') {
+        // Liveness: is the process alive?
+        const staleMs = this.lastCycleAt
+          ? Date.now() - this.lastCycleAt.getTime()
+          : Date.now() - this.startedAt.getTime();
+        // Unhealthy if no cycle in 5 minutes
+        const healthy = staleMs < 300_000;
+
+        res.writeHead(healthy ? 200 : 503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          status: healthy ? 'ok' : 'stale',
+          uptime: Math.floor((Date.now() - this.startedAt.getTime()) / 1000),
+          lastCycle: this.lastCycleAt?.toISOString() || null,
+          cycleCount: this.cycleCount,
+          lastError: this.lastError,
+          chain: CONFIG.activeChain.name,
+          chainId: CONFIG.activeChain.chainId,
+        }));
+      } else if (req.url === '/ready') {
+        // Readiness: has the first cycle run?
+        const ready = this.cycleCount > 0;
+        res.writeHead(ready ? 200 : 503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ready }));
+      } else {
+        res.writeHead(404);
+        res.end();
+      }
+    });
+
+    server.listen(port, () => {
+      console.log(`🏥 Health server on :${port}/health`);
+    });
   }
 
   async run() {
@@ -116,8 +163,12 @@ class AgentLiquidityManager {
     while (true) {
       try {
         await this.cycle();
+        this.lastCycleAt = new Date();
+        this.cycleCount++;
+        this.lastError = null;
       } catch (error) {
         console.error('❌ Cycle error:', error);
+        this.lastError = error instanceof Error ? error.message : String(error);
       }
       await this.sleep(CONFIG.checkIntervalMs);
     }
