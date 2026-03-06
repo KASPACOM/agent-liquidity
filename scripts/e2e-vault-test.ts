@@ -814,37 +814,59 @@ async function depositIntoVault(
 
 async function ensureVaultInventory(context: RuntimeContext): Promise<void> {
   for (const pair of PAIRS) {
-    const snapshot = await readPairSnapshot(context, pair);
-    const tokenTarget = (pair.lpTargetWkas * snapshot.reserveToken) / snapshot.reserveWkas;
-    const tokenBuffer = (tokenTarget * 3n) / 2n;
-    const currentTokenBalance = await getVaultTokenBalance(context, pair.token.address);
-    if (currentTokenBalance < tokenBuffer) {
-      await depositIntoVault(
-        context,
-        pair.token.address,
-        tokenBuffer - currentTokenBalance,
-        context.tokenDeployer,
-        'Token Deployer'
-      );
+    try {
+      const snapshot = await readPairSnapshot(context, pair);
+      if (snapshot.reserveToken === 0n || snapshot.reserveWkas === 0n) {
+        console.log(`    ⚠️  ${pair.key} pool has no liquidity — skipping inventory`);
+        context.configNotes.push(`${pair.key} pool empty — skipped inventory`);
+        continue;
+      }
+      const tokenTarget = (pair.lpTargetWkas * snapshot.reserveToken) / snapshot.reserveWkas;
+      const tokenBuffer = (tokenTarget * 3n) / 2n;
+      const currentTokenBalance = await getVaultTokenBalance(context, pair.token.address);
+      if (currentTokenBalance < tokenBuffer) {
+        const needed = tokenBuffer - currentTokenBalance;
+        // Check if deployer has enough before attempting
+        const deployerBalance = BigInt(await (new Contract(pair.token.address, ERC20_ABI, context.tokenDeployer))['balanceOf'](context.tokenDeployer.address));
+        if (deployerBalance < needed) {
+          console.log(`    ⚠️  Deployer has insufficient ${pair.token.symbol} (${deployerBalance} < ${needed}) — skipping deposit`);
+          context.configNotes.push(`Insufficient ${pair.token.symbol} for vault inventory — skipped`);
+          continue;
+        }
+        await depositIntoVault(
+          context,
+          pair.token.address,
+          needed,
+          context.tokenDeployer,
+          'Token Deployer'
+        );
+      }
+    } catch (err: any) {
+      console.log(`    ⚠️  ensureVaultInventory ${pair.key} failed: ${err.message?.slice(0, 100)} — continuing`);
+      context.configNotes.push(`ensureVaultInventory ${pair.key} failed: ${err.message?.slice(0, 100)}`);
     }
   }
 
   const currentWkasBalance = await getVaultTokenBalance(context, ADDRESSES.wkas);
   const minimumWkas = parseEther('120');
   if (currentWkasBalance < minimumWkas) {
-    const topUp = minimumWkas - currentWkasBalance;
-    const deployerWkas = context.wkas.connect(context.deployer) as AnyContract;
-    await withReceipt(
-      context,
-      'Deployer',
-      'wrap WKAS for vault top-up',
-      async () =>
-        deployerWkas['deposit']({
-          ...(await txOverrides(context, context.deployer, { value: topUp })),
-        }),
-      { amountIn: topUp, amountOut: topUp }
-    );
-    await depositIntoVault(context, ADDRESSES.wkas, topUp, context.deployer, 'Deployer');
+    try {
+      const topUp = minimumWkas - currentWkasBalance;
+      const deployerWkas = context.wkas.connect(context.deployer) as AnyContract;
+      await withReceipt(
+        context,
+        'Deployer',
+        'wrap WKAS for vault top-up',
+        async () =>
+          deployerWkas['deposit']({
+            ...(await txOverrides(context, context.deployer, { value: topUp })),
+          }),
+        { amountIn: topUp, amountOut: topUp, signer: context.deployer }
+      );
+      await depositIntoVault(context, ADDRESSES.wkas, topUp, context.deployer, 'Deployer');
+    } catch (err: any) {
+      console.log(`    ⚠️  WKAS vault top-up failed: ${err.message?.slice(0, 100)} — continuing`);
+    }
   }
 }
 
@@ -852,30 +874,49 @@ async function enterVaultLpPositions(context: RuntimeContext): Promise<void> {
   const vault = context.vault.connect(context.vaultRunner) as AnyContract;
   for (const pair of PAIRS) {
     console.log(`  Processing ${pair.key} LP entry...`);
-    const before = await readPairSnapshot(context, pair);
+    let before: Awaited<ReturnType<typeof readPairSnapshot>>;
+    try {
+      before = await readPairSnapshot(context, pair);
+    } catch (err: any) {
+      console.log(`    ⚠️  ${pair.key} readPairSnapshot failed — skipping: ${err.message?.slice(0, 80)}`);
+      context.configNotes.push(`${pair.key} LP skipped (pair snapshot failed)`);
+      continue;
+    }
+    if (before.reserveToken === 0n || before.reserveWkas === 0n) {
+      console.log(`    ⚠️  ${pair.key} pool empty — skipping LP entry`);
+      context.configNotes.push(`${pair.key} LP skipped (empty pool)`);
+      continue;
+    }
     console.log(`    Reserve snapshot: ${formatToken(before.reserveToken, pair.token.decimals)} ${pair.token.symbol}, ${formatWkas(before.reserveWkas)} WKAS`);
     const vaultTokenBefore = await getVaultTokenBalance(context, pair.token.address);
     const vaultWkasBefore = await getVaultTokenBalance(context, ADDRESSES.wkas);
     const desiredToken = (pair.lpTargetWkas * before.reserveToken) / before.reserveWkas;
     console.log(`    Vault balances before: ${formatToken(vaultTokenBefore, pair.token.decimals)} ${pair.token.symbol}, ${formatWkas(vaultWkasBefore)} WKAS`);
     console.log(`    Adding liquidity: ${formatToken(desiredToken, pair.token.decimals)} ${pair.token.symbol} + ${formatWkas(pair.lpTargetWkas)} WKAS...`);
-    const receipt = await withReceipt(
-      context,
-      'Vault',
-      `addLiquidity ${pair.key}`,
-      async () =>
-        vault['addLiquidity'](
-          pair.token.address,
-          ADDRESSES.wkas,
-          desiredToken,
-          pair.lpTargetWkas,
-          applySlippage(desiredToken, 200),
-          applySlippage(pair.lpTargetWkas, 200),
-          makeDeadline(context),
-          await txOverrides(context, context.vaultRunner)
-        ),
-      { pair: pair.key, amountIn: desiredToken, amountOut: pair.lpTargetWkas }
-    );
+    let receipt: any;
+    try {
+      receipt = await withReceipt(
+        context,
+        'Vault',
+        `addLiquidity ${pair.key}`,
+        async () =>
+          vault['addLiquidity'](
+            pair.token.address,
+            ADDRESSES.wkas,
+            desiredToken,
+            pair.lpTargetWkas,
+            applySlippage(desiredToken, 200),
+            applySlippage(pair.lpTargetWkas, 200),
+            makeDeadline(context),
+            await txOverrides(context, context.vaultRunner)
+          ),
+        { pair: pair.key, amountIn: desiredToken, amountOut: pair.lpTargetWkas, signer: context.vaultRunner }
+      );
+    } catch (err: any) {
+      console.log(`    ⚠️  addLiquidity ${pair.key} failed: ${err.message?.slice(0, 100)} — skipping`);
+      context.configNotes.push(`addLiquidity ${pair.key} failed: ${err.message?.slice(0, 100)}`);
+      continue;
+    }
     console.log(`    ✓ LP entry TX: ${explorerTx(receipt.hash)}`);
 
     const pairContract = getPairContract(context, pair.key);
