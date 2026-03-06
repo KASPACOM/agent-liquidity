@@ -35,7 +35,7 @@ const DEFAULT_SEED_PHRASE =
 const MAX_UINT256 = (1n << 256n) - 1n;
 
 const ADDRESSES = {
-  vault: getAddress('0xEB661B0baE5383c0789DF2C7FEc190C633c9D1c8'),
+  vault: getAddress('0xa3ED9723EbCb88916b1f80c3988A13a49cd372E5'),
   router: getAddress('0x47F80b6D7071B7738D6DD9d973D7515ce753e9d9'),
   factory: getAddress('0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0'),
   wkas: getAddress('0x394C68684F9AFCEb9b804531EF07a864E8081738'),
@@ -116,9 +116,12 @@ const WKAS_ABI = [
 
 const TX_OVERRIDES = {
   type: 0,
-  gasPrice: 2_000_000_000_000n,
+  gasPrice: 2_000_000_000_001n, // 1 wei above floor — Pavel's fix for Galleon rounding
   gasLimit: 3_000_000n,
 };
+
+const MAX_TX_RETRIES = 5;
+const MEMPOOL_POLL_MS = 3000;
 
 type TokenSymbol = keyof typeof TOKENS;
 type PairKey = (typeof PAIRS)[number]['key'];
@@ -430,7 +433,8 @@ async function syncChainTime(context: RuntimeContext): Promise<void> {
 }
 
 function makeDeadline(context: RuntimeContext): bigint {
-  return BigInt(Math.floor(Date.now() / 1000) + context.clockOffset + 300);
+  // Use chain time — Galleon block.timestamp is ~3h ahead of real time
+  return BigInt(Math.floor(Date.now() / 1000) + context.clockOffset + 600);
 }
 
 async function withReceipt(
@@ -444,29 +448,60 @@ async function withReceipt(
     amountOut?: bigint;
   } = {}
 ): Promise<any> {
-  const tx = await send();
-  console.log(`      TX sent: ${tx.hash}`);
-  
-  // Add timeout to tx.wait()
-  const timeoutPromise = new Promise<never>((_, reject) => 
-    setTimeout(() => reject(new Error('Transaction confirmation timeout after 60s')), 60_000)
-  );
-  
-  const receipt = await Promise.race([tx.wait(), timeoutPromise]);
-  const block = await context.provider.getBlock(receipt.blockNumber);
-  context.allTransactions.push({
-    wallet: walletLabel,
-    action,
-    pair: details.pair,
-    amountIn: details.amountIn?.toString(),
-    amountOut: details.amountOut?.toString(),
-    txHash: tx.hash,
-    explorerUrl: explorerTx(tx.hash),
-    blockNumber: Number(receipt.blockNumber),
-    timestamp: block ? new Date(block.timestamp * 1000).toISOString() : nowIso(),
-    gasUsed: receipt.gasUsed.toString(),
-  });
-  return receipt;
+  // Pavel's retry pattern: poll mempool after 3s, rebroadcast if TX dropped
+  for (let attempt = 1; attempt <= MAX_TX_RETRIES; attempt++) {
+    try {
+      const tx = await send();
+      console.log(`      TX sent: ${tx.hash}`);
+      
+      // Poll mempool within 3 seconds
+      await new Promise(r => setTimeout(r, MEMPOOL_POLL_MS));
+      const txCheck = await context.provider.getTransaction(tx.hash);
+      
+      if (!txCheck) {
+        // TX was silently dropped from mempool
+        if (attempt < MAX_TX_RETRIES) {
+          console.log(`      ⚠️  TX dropped from mempool (attempt ${attempt}/${MAX_TX_RETRIES}) — rebroadcasting...`);
+          continue;
+        }
+        console.log(`      ❌ TX dropped — all ${MAX_TX_RETRIES} retries exhausted`);
+        throw new Error(`TX dropped from mempool after ${MAX_TX_RETRIES} retries`);
+      }
+      
+      // TX is in mempool — wait for confirmation with timeout
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Transaction confirmation timeout after 60s')), 60_000)
+      );
+      
+      const receipt = await Promise.race([tx.wait(), timeoutPromise]);
+      if (receipt && receipt.status === 0) {
+        console.log(`      ❌ TX REVERTED: ${explorerTx(tx.hash)}`);
+        throw new Error(`TX reverted: ${action}`);
+      }
+      
+      const block = await context.provider.getBlock(receipt.blockNumber);
+      context.allTransactions.push({
+        wallet: walletLabel,
+        action,
+        pair: details.pair,
+        amountIn: details.amountIn?.toString(),
+        amountOut: details.amountOut?.toString(),
+        txHash: tx.hash,
+        explorerUrl: explorerTx(tx.hash),
+        blockNumber: Number(receipt.blockNumber),
+        timestamp: block ? new Date(block.timestamp * 1000).toISOString() : nowIso(),
+        gasUsed: receipt.gasUsed.toString(),
+      });
+      return receipt;
+    } catch (err: any) {
+      if (attempt < MAX_TX_RETRIES && (err.message?.includes('timeout') || err.message?.includes('dropped'))) {
+        console.log(`      ⚠️  ${action} error (attempt ${attempt}/${MAX_TX_RETRIES}): ${err.message?.slice(0, 100)} — retrying...`);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error(`withReceipt: exhausted all ${MAX_TX_RETRIES} retries for ${action}`);
 }
 
 async function validateChain(context: RuntimeContext): Promise<void> {
