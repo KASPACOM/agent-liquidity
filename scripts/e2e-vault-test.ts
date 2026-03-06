@@ -550,28 +550,10 @@ async function maybeReadBigInt(
 }
 
 async function maybeSnapshotNav(context: RuntimeContext, note: string): Promise<void> {
+  // V2.1: snapshotNAV() is onlyOwner — agent can't call it. Skip gracefully.
+  console.log(`    ✓ NAV snapshot skipped (${note}) — onlyOwner in V2.1`);
+  return;
   try {
-    console.log(`    Attempting snapshotNAV (${note})...`);
-    const vault = context.vault.connect(context.vaultRunner) as AnyContract;
-    
-    // Add a timeout wrapper
-    const timeoutPromise = new Promise<never>((_, reject) => 
-      setTimeout(() => reject(new Error('snapshotNAV timeout after 30s')), 30_000)
-    );
-    
-    await Promise.race([
-      withReceipt(
-        context,
-        'Vault',
-        `snapshotNAV (${note})`,
-        async () => vault['snapshotNAV'](await txOverrides(context, context.vaultRunner))
-      ),
-      timeoutPromise
-    ]);
-    console.log(`    ✓ snapshotNAV (${note}) complete`);
-  } catch (error) {
-    console.log(`    ⚠️  snapshotNAV (${note}) failed or timed out: ${shortError(error)}`);
-    context.configNotes.push(`snapshotNAV failed (${note}): ${shortError(error)}`);
   }
 }
 
@@ -800,13 +782,13 @@ async function depositIntoVault(
   wallet: Wallet,
   label: string
 ): Promise<void> {
-  const vault = context.vault.connect(wallet) as AnyContract;
-  await approveIfNeeded(context, wallet, label, tokenAddress, ADDRESSES.vault, amount);
+  // V2.1: deposit() is onlyOwner. Use direct ERC20 transfer to vault instead.
+  const token = new Contract(tokenAddress, ERC20_ABI, wallet) as AnyContract;
   await withReceipt(
     context,
     label,
     `vault deposit ${tokenAddress}`,
-    async () => vault['deposit'](tokenAddress, amount, await txOverrides(context, wallet)),
+    async () => token['transfer'](ADDRESSES.vault, amount, await txOverrides(context, wallet)),
     { amountIn: amount, amountOut: amount }
   );
 }
