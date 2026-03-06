@@ -552,9 +552,6 @@ async function maybeReadBigInt(
 async function maybeSnapshotNav(context: RuntimeContext, note: string): Promise<void> {
   // V2.1: snapshotNAV() is onlyOwner — agent can't call it. Skip gracefully.
   console.log(`    ✓ NAV snapshot skipped (${note}) — onlyOwner in V2.1`);
-  return;
-  try {
-  }
 }
 
 function getPairContract(context: RuntimeContext, pairKey: PairKey): AnyContract {
