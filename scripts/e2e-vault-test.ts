@@ -358,11 +358,25 @@ function deriveWallet(index: number, provider: JsonRpcProvider): Wallet {
 async function getNextNonce(context: RuntimeContext, wallet: Wallet): Promise<number> {
   const address = wallet.address;
   if (!context.nonceMap.has(address)) {
-    context.nonceMap.set(address, await context.provider.getTransactionCount(address, 'pending'));
+    context.nonceMap.set(address, await context.provider.getTransactionCount(address, 'latest'));
   }
   const next = context.nonceMap.get(address)!;
   context.nonceMap.set(address, next + 1);
   return next;
+}
+
+function rollbackNonce(context: RuntimeContext, wallet: Wallet): void {
+  const address = wallet.address;
+  const current = context.nonceMap.get(address);
+  if (current !== undefined && current > 0) {
+    context.nonceMap.set(address, current - 1);
+  }
+}
+
+async function syncNonce(context: RuntimeContext, wallet: Wallet): Promise<void> {
+  const address = wallet.address;
+  const onchain = await context.provider.getTransactionCount(address, 'latest');
+  context.nonceMap.set(address, onchain);
 }
 
 async function txOverrides(
@@ -446,9 +460,11 @@ async function withReceipt(
     pair?: string;
     amountIn?: bigint;
     amountOut?: bigint;
+    signer?: Wallet;
   } = {}
 ): Promise<any> {
-  // Pavel's retry pattern: poll mempool after 3s, rebroadcast if TX dropped
+  // Pavel's retry pattern: poll mempool after 3s, rebroadcast if TX dropped.
+  // KEY: on a dropped TX, sync nonce from chain before retry so we don't advance nonce unnecessarily.
   for (let attempt = 1; attempt <= MAX_TX_RETRIES; attempt++) {
     try {
       const tx = await send();
@@ -459,9 +475,12 @@ async function withReceipt(
       const txCheck = await context.provider.getTransaction(tx.hash);
       
       if (!txCheck) {
-        // TX was silently dropped from mempool
         if (attempt < MAX_TX_RETRIES) {
           console.log(`      ⚠️  TX dropped from mempool (attempt ${attempt}/${MAX_TX_RETRIES}) — rebroadcasting...`);
+          // Sync nonce from chain so next send() uses the correct (unadvanced) nonce
+          if (details.signer) {
+            await syncNonce(context, details.signer);
+          }
           continue;
         }
         console.log(`      ❌ TX dropped — all ${MAX_TX_RETRIES} retries exhausted`);
@@ -496,6 +515,9 @@ async function withReceipt(
     } catch (err: any) {
       if (attempt < MAX_TX_RETRIES && (err.message?.includes('timeout') || err.message?.includes('dropped'))) {
         console.log(`      ⚠️  ${action} error (attempt ${attempt}/${MAX_TX_RETRIES}): ${err.message?.slice(0, 100)} — retrying...`);
+        if (details.signer) {
+          await syncNonce(context, details.signer);
+        }
         continue;
       }
       throw err;
@@ -678,7 +700,7 @@ async function fundWallets(context: RuntimeContext): Promise<void> {
             value: PER_WALLET_NATIVE,
             ...(await txOverrides(context, context.deployer)),
           }),
-        { amountOut: PER_WALLET_NATIVE }
+        { amountOut: PER_WALLET_NATIVE, signer: context.deployer }
       );
       if (wallet.index % 10 === 0) console.log(`    funded ${wallet.index}/50`);
     } catch (error) {
@@ -786,7 +808,7 @@ async function depositIntoVault(
     label,
     `vault deposit ${tokenAddress}`,
     async () => token['transfer'](ADDRESSES.vault, amount, await txOverrides(context, wallet)),
-    { amountIn: amount, amountOut: amount }
+    { amountIn: amount, amountOut: amount, signer: wallet }
   );
 }
 
