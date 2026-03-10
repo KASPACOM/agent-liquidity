@@ -9,6 +9,10 @@ export interface ChainConfig {
   chainId: number;
   enabled: boolean;
   rpcUrl: string;
+  // Subgraph URLs
+  graphNodeUrl?: string;
+  tokenGraphUrl?: string;
+  aaveSubgraphUrl?: string;
   aaveContracts: {
     pool: string;
     poolDataProvider: string;
