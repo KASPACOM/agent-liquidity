@@ -3,25 +3,8 @@
  * Ported from ethers v5 to viem
  */
 import { createPublicClient, http, PublicClient, formatUnits } from 'viem';
+import { AAVE_ORACLE_ABI } from '../../contracts/abis';
 import { ChainConfig, PriceData } from './types';
-
-// ABI for Aave Price Oracle
-const PRICE_ORACLE_ABI = [
-  {
-    inputs: [{ name: 'asset', type: 'address' }],
-    name: 'getAssetPrice',
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [{ name: 'assets', type: 'address[]' }],
-    name: 'getAssetsPrices',
-    outputs: [{ name: '', type: 'uint256[]' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-] as const;
 
 const PRICE_CACHE_TTL_MS = 30_000; // 30 seconds
 
@@ -74,7 +57,7 @@ export class PriceMonitor {
     // Get price from Aave Oracle
     const aaveOraclePrice = await client.readContract({
       address: chain.aaveContracts.oracle as `0x${string}`,
-      abi: PRICE_ORACLE_ABI,
+      abi: AAVE_ORACLE_ABI,
       functionName: 'getAssetPrice',
       args: [assetAddress as `0x${string}`],
     }) as bigint;
@@ -112,7 +95,7 @@ export class PriceMonitor {
     // Get prices from Aave Oracle in batch
     const aaveOraclePrices = await client.readContract({
       address: chain.aaveContracts.oracle as `0x${string}`,
-      abi: PRICE_ORACLE_ABI,
+      abi: AAVE_ORACLE_ABI,
       functionName: 'getAssetsPrices',
       args: [assetAddresses as `0x${string}`[]],
     }) as bigint[];

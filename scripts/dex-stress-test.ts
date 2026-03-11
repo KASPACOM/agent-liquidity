@@ -16,10 +16,7 @@ import {
   toUtf8Bytes,
 } from 'ethers';
 import { CONFIG } from '../src/config';
-import { ERC20_ABI } from '../src/plugins/kaspacom-dex/abi/erc20';
-import { FACTORY_ABI } from '../src/plugins/kaspacom-dex/abi/factory';
-import { PAIR_ABI } from '../src/plugins/kaspacom-dex/abi/pair';
-import { VAULT_ABI } from '../src/plugins/kaspacom-dex/abi/vault';
+import { ERC20_ABI, FACTORY_ABI, PAIR_ABI, VAULT_ABI } from '../src/contracts/abis';
 
 dotenvConfig();
 
