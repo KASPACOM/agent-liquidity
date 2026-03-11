@@ -3,6 +3,7 @@
  * Ported from ethers v5 to viem
  * Orchestrates monitoring, assessment, and execution
  */
+import { formatUnits } from 'viem';
 import { HealthFactorMonitor } from './health-monitor';
 import { Liquidator } from './liquidator';
 import {
@@ -259,8 +260,8 @@ export class StrategyManager {
         return;
       }
 
-      // Find the most profitable liquidation across all positions
-      let bestOpportunity: any = null;
+      // Collect ALL profitable opportunities, sorted by priority (highest first)
+      const opportunities: any[] = [];
 
       for (const position of liquidatablePositions) {
         for (const debtAsset of position.debtAssets) {
@@ -280,38 +281,56 @@ export class StrategyManager {
             );
 
             if (profitCalculation.profitable) {
-              // Check if this is better than our current best opportunity
-              if (
-                !bestOpportunity ||
-                profitCalculation.executionPriority > bestOpportunity.executionPriority
-              ) {
-                bestOpportunity = profitCalculation;
-              }
+              opportunities.push(profitCalculation);
             }
           }
         }
       }
 
-      // If we found a profitable opportunity, execute it
-      if (bestOpportunity) {
+      if (opportunities.length === 0) {
+        return;
+      }
+
+      // Sort by execution priority (highest profit first)
+      opportunities.sort((a, b) => b.executionPriority - a.executionPriority);
+
+      console.log(`[${chain.name}] Executing ${opportunities.length} liquidation(s) this cycle`);
+
+      // Execute ALL profitable targets sequentially
+      let successCount = 0;
+      for (const opportunity of opportunities) {
+        // Re-check balance before each execution (previous liquidation may have spent tokens)
+        const currentBalance = await this.liquidator.checkBalance(chain, opportunity.debtAsset.address);
+        if (currentBalance < opportunity.debtToCover) {
+          console.log(
+            `[${chain.name}] Skipping ${opportunity.target.user} — insufficient ${opportunity.debtAsset.symbol} ` +
+              `(have: ${formatUnits(currentBalance, opportunity.debtAsset.decimals)}, ` +
+              `need: ${formatUnits(opportunity.debtToCover, opportunity.debtAsset.decimals)})`
+          );
+          continue;
+        }
+
         console.log(
-          `[${chain.name}] Executing liquidation for ${bestOpportunity.target.user} ` +
-            `(Expected profit: $${bestOpportunity.netProfitUsd.toFixed(2)})`
+          `[${chain.name}] Executing liquidation for ${opportunity.target.user} ` +
+            `(Expected profit: $${opportunity.netProfitUsd.toFixed(2)})`
         );
 
-        // Execute the liquidation
-        const result = await this.liquidator.executeDirectLiquidation(chain, bestOpportunity);
-
-        // Record the execution
-        this.lastExecutionTime.set(chain.chainId, now);
+        const result = await this.liquidator.executeDirectLiquidation(chain, opportunity);
         this.executionHistory.push(result);
 
-        // Log the result
-        if (result.success) {
-          console.log(`[${chain.name}] ✅ Liquidation successful! Tx hash: ${result.transactionHash}`);
-        } else {
+        // Log failure only here — success is already logged by liquidator
+        if (!result.success) {
           console.error(`[${chain.name}] ❌ Liquidation failed: ${result.error}`);
+        } else {
+          successCount++;
         }
+      }
+
+      // Update cooldown after batch execution
+      this.lastExecutionTime.set(chain.chainId, now);
+
+      if (successCount > 0) {
+        console.log(`[${chain.name}] Batch complete: ${successCount}/${opportunities.length} liquidations succeeded`);
       }
     } catch (error) {
       console.error(`[${chain.name}] Error executing strategy:`, error);
