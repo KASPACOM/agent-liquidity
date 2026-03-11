@@ -1,0 +1,2222 @@
+[
+  {
+    "index": 1,
+    "address": "0x91b0d1d7D2eD25995e54CB1aE52cc83C1A0E84f7",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 2,
+    "address": "0x9C3e70C500DB8A154B16f834EC4767a6a805021c",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 3,
+    "address": "0xC3a37C2192D6a10D18A37d9D954b6Fc62de6293b",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 4,
+    "address": "0xB617087E0C043C06BEc6cC8f950ec7A1855A6b97",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 5,
+    "address": "0x092d16Bb10694ccDA2e8bE4C6A29c64e91839E7d",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 6,
+    "address": "0x24e484a8bb3f5eC698585e7bc4F6A25433231E01",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 7,
+    "address": "0xA6E6a730048acd987d377031f125622c9689802B",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 8,
+    "address": "0xe6e734eeC90758F4d041D9068222188B458c5E5C",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 9,
+    "address": "0xe9cDC10411FfCED9002AB8C732B9062EdC465062",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 10,
+    "address": "0x48f974336E4D24b7DfB99147780Ae6D71bEd1fEF",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 11,
+    "address": "0x1737b1107f953f6a5E99124A4092cBE78721C589",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 12,
+    "address": "0x0B293CE7e284136AEeabd31e42c7aFEfEDcfAFba",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 13,
+    "address": "0x69dad7CD14Af28D6240Eb1d3044aDE11A1021726",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 14,
+    "address": "0x11ab0acd2A10d47b0Bc3F1A079A313b5afc92194",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 15,
+    "address": "0x66b7E30D72c62Ce02F5366B0e8901819279C0d07",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 16,
+    "address": "0x9acAe6eBDfCdd666D766c610170E6708d75ACe9a",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 17,
+    "address": "0x1Bd903d336E818b199AaB1A5b306976a3A8b9353",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 18,
+    "address": "0xbEc95Cc69e7C8Ba7c483D653CBEbA50a243Ced09",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 19,
+    "address": "0x4cB4F7De2f503Aa366489Bb8375E786C8cC93CFA",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 20,
+    "address": "0xB3628462E4B0ccF8554D39FAB54aae0B82C89F79",
+    "role": "Conservative Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "1000"
+        },
+        {
+          "token": "USDC",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [],
+      "targetHF": null
+    }
+  },
+  {
+    "index": 21,
+    "address": "0xc16e7eA2F639a7E7e52bB9Be18C0c79954319E8e",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 22,
+    "address": "0x8B929C76545e74E7A0850CC9aD837CC4c07D5b49",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 23,
+    "address": "0xd70F82365d60daBDbc3d88d7AF0bFe2634d606da",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 24,
+    "address": "0x056C5C34e77431EBFAcF4d0a52074F8210C22647",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 25,
+    "address": "0x5194d2C1ef66291ba943F1fC3046FEd0F8AAfDe4",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 26,
+    "address": "0x02cd6D6b015D8fFB89a865e86153304347a0dE96",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 27,
+    "address": "0x0dabE7a615E733f000F781e02bf7E614579d9FD4",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 28,
+    "address": "0xe27839a26A8Fd0D672269E8d82b4B2667aCA6613",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 29,
+    "address": "0x42866550b795353D9a506361E091A381da3E0194",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 30,
+    "address": "0x1cAEc79410884aBfA1F27064Ed9bF30933a0E435",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 31,
+    "address": "0x3574d89c89a0a2ef8825c6ad5590FaD01611D116",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 32,
+    "address": "0x139F171B813C62c86a1182140963a7b7cFe2c281",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 33,
+    "address": "0xB0a1D5fb89598B2446beA0ebd002860BD6Aa8310",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 34,
+    "address": "0x0eA0Ad07355643ac8e19678915C81DD3f260218B",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 35,
+    "address": "0x5991E67aF744c31e9e5e1E0a2f5C054045696b30",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 36,
+    "address": "0xFE8f2289Cb80B38984DABeC4f03c38180682Ab01",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 37,
+    "address": "0xC3451471ECdCD29b7EDfa195EcE3fa8a75D6fA08",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 38,
+    "address": "0x03259Ffd8F57135aF07316E40e5e73eB49807EDC",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 39,
+    "address": "0x08730bE49635bdC7C4B2C87A1de905155Aa10F55",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 40,
+    "address": "0x6CDDbfF3A4F97904fffb0C01226A9F970153221b",
+    "role": "Safe Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "2000"
+        },
+        {
+          "token": "USDT",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 50
+        }
+      ],
+      "targetHF": 2.5
+    }
+  },
+  {
+    "index": 41,
+    "address": "0xb41a8390bc6F5eB1520Da4d974fD09165D3bc764",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 42,
+    "address": "0x92cb674C6032F2e0374bAbF729811cfC5B77165a",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 43,
+    "address": "0x210F3c9c4c94fbe589d71951616681B9F4fAf6f1",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 44,
+    "address": "0xc594bE6cdEDa89d08d879ac70e009243CB69B965",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 45,
+    "address": "0xcbC3992BF75c9B4363495Bd40f09F3bdEE88df6C",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 46,
+    "address": "0xe792ad10ABe0760a7B44a17Dede17057A1c3dd03",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 47,
+    "address": "0x778ACd8AB58b75277539b2d67b13B922a34A3304",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 48,
+    "address": "0x180e64fa2a47CEc21cD7aFfa5364AFd140903659",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 49,
+    "address": "0x0493863ADD0AAb82d13A42B93A2Ef13b94Ae7f95",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 50,
+    "address": "0x742E4ea653a5698b3347196561A4d72ed83588d1",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 51,
+    "address": "0x40A7e643d0Ee28daa5Dee269C5108148b69b4D3a",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 52,
+    "address": "0xE0e3F14C770E413C7A17Ca7A430de4d8380e82dF",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 53,
+    "address": "0x87E611BEa67E84Ff0cad8Ba00EaBFb4fC6396e33",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 54,
+    "address": "0x42B4795b70be04c13578a6949CE6a6880fF65f56",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 55,
+    "address": "0xb4f91487D789668742F2F0E992D2a7815Fe37614",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 56,
+    "address": "0xDc635a239e91860784A2766b058787598e8bD654",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 57,
+    "address": "0xd93Ad01a1B9d54AcC475E4d20B300f714b927057",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 58,
+    "address": "0x58a97fe733DdAe75817Fa493C34345d2B112248c",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 59,
+    "address": "0xf98031388C7FCa40705bB7C0AfcCA664E37Bb855",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 60,
+    "address": "0xA68837c1bEAf5E48dde9BCF61D14c6Ce63a5144F",
+    "role": "Moderate Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "5"
+        },
+        {
+          "token": "WBTC",
+          "amount": "0.1"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDT",
+          "borrowPercent": 65
+        }
+      ],
+      "targetHF": 1.75
+    }
+  },
+  {
+    "index": 61,
+    "address": "0x64d794678d66d01b7901E2C0D9F459Fd0e47daec",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 62,
+    "address": "0xcA37066f9a5FE396E5A97b60E5B080D3C76F5E9F",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 63,
+    "address": "0x0441bbb4BfECfE084b835aA4275963EbE01F0A0b",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 64,
+    "address": "0xFc586FBfdAA8d6675f5Ba1a215B86A0cffC48083",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 65,
+    "address": "0x9FA81c2cc180428A9b7bC0eD668dC84d7fEF24F2",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 66,
+    "address": "0x67beb4067329763B82cFD7069F64B76Ad2a1F016",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 67,
+    "address": "0xF6e5F387C47c6d5B6bcc5CA0f8F084416d86573a",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 68,
+    "address": "0x1A02ADacf1d2421833B0eA618F0710B214814A8E",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 69,
+    "address": "0x1d0DdAb8759056d77d4b8DfE0A3CC499982B64C1",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 70,
+    "address": "0x21ebbE37290Ad191cC9F96dAfc499B277a6815fc",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 71,
+    "address": "0x8ad1cd5d00d12462fD259554F9Fc2458927904a9",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 72,
+    "address": "0xe6B6895B994d58b28AbF9B6F3E1571e37c195aA1",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 73,
+    "address": "0xB86467D8f54353bC56D39c4AAAA50B26188F9522",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 74,
+    "address": "0xEdfE07cCDfDF49b0C973b7FEF1A9813f240394e7",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 75,
+    "address": "0x642A8C11778EAa76B07f45c804109dDD2ED73Be7",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 76,
+    "address": "0x82Fc0d6671ddf17614Bed51169878963161884D9",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 77,
+    "address": "0x4F37EA57F10FF864Af96cd1982906eEE833d1e61",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 78,
+    "address": "0xFEFCd5Bb4C308e1A9349B992B76e0C8Ec74b54f2",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 79,
+    "address": "0x8f42D8829f192E36af4D8f7b0C0A2351C1053b4E",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 80,
+    "address": "0x80F1fC88dDc52441FbF0ab1FB173d1A590299eC6",
+    "role": "Aggressive Borrower",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "5000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "DAI",
+          "borrowPercent": 80
+        }
+      ],
+      "targetHF": 1.35
+    }
+  },
+  {
+    "index": 81,
+    "address": "0xD548C56FDc3173FabA8da3D5e41659e0F13C3015",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 82,
+    "address": "0x967ba61B589C5AADA5f71DC2818bdCF7f5631e8d",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 83,
+    "address": "0x0dFa23f5cA9dd02604962C63d6D87F53d49072c9",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 84,
+    "address": "0xa950e3cfFB5d96bDC39795a5292c43De637691A1",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 85,
+    "address": "0xf4a4e8599C2E8894e64f06bf0758994D21f8D937",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 86,
+    "address": "0x8d5A6b4Be856d7567903E98FF119198C4b3C0B6D",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 87,
+    "address": "0x8eC90f75A6bF826768e1e88BfDeee2ab284f9225",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 88,
+    "address": "0x792E90dCF44D9c2870109dE3218E4D512E3150De",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 89,
+    "address": "0x21dDBbe048daB86ad204A48bF5c0571002609c2c",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 90,
+    "address": "0xAC03C13DC5D9E961dE1E9aF1a11B2a60a16075E1",
+    "role": "Whale Supplier",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "10000"
+        },
+        {
+          "token": "USDC",
+          "amount": "50000"
+        },
+        {
+          "token": "WETH",
+          "amount": "10"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 20
+        }
+      ],
+      "targetHF": 6
+    }
+  },
+  {
+    "index": 91,
+    "address": "0x71a368C13f7d5467883561D88b734f2361C4Ce10",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 92,
+    "address": "0x27A2600aceb1dab874017Bf02374e1b18666209B",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "3"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 93,
+    "address": "0x432b789adf63891A8E84F8DA0C6792a4b985775F",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 94,
+    "address": "0x4fb2A44CA4b636AF3140Bd7ad49C62AeEcb21471",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "3"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 95,
+    "address": "0xeC98eE95e43eFf20F09157198fD17b050fAb9935",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 96,
+    "address": "0x2A1b0d9d902c92C11b20Ab77BF1e2ea6e1749e84",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "3"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 97,
+    "address": "0x54F4AC269D82C3c1c2b1dd4FBe84bcB8a73FF2E9",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 98,
+    "address": "0x4c7f8AF3b42e557d91d78e59341f98a45DF8CF77",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "3"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 99,
+    "address": "0x31D18d78297D2B26A5774e70EfC9D4e2604C8938",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WKAS",
+          "amount": "3000"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  },
+  {
+    "index": 100,
+    "address": "0xCb0f7eF744AF621Dc148a5e6C0E601F343c9BF6a",
+    "role": "Liquidation Target",
+    "profile": {
+      "collateral": [
+        {
+          "token": "WETH",
+          "amount": "3"
+        }
+      ],
+      "borrows": [
+        {
+          "token": "USDC",
+          "borrowPercent": 90
+        }
+      ],
+      "targetHF": 1.1
+    }
+  }
+]
