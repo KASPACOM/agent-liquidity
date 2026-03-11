@@ -1,7 +1,5 @@
 import { createPublicClient, getAddress, http, zeroAddress, type PublicClient } from 'viem';
-import { ERC20_ABI } from '../../plugins/kaspacom-dex/abi/erc20';
-import { FACTORY_ABI } from '../../plugins/kaspacom-dex/abi/factory';
-import { PAIR_ABI } from '../../plugins/kaspacom-dex/abi/pair';
+import { ERC20_ABI, FACTORY_ABI, PAIR_ABI } from '../../contracts/abis';
 
 export interface PairState {
   pairAddress: string;

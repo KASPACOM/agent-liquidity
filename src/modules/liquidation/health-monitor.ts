@@ -3,39 +3,8 @@
  * Ported from ethers v5 to viem
  */
 import { createPublicClient, http, PublicClient, parseUnits, formatUnits } from 'viem';
+import { AAVE_POOL_ABI, ERC20_ABI } from '../../contracts/abis';
 import { ChainConfig, UserAccountData, LiquidationTarget, Asset } from './types';
-
-// ABIs for Aave contracts
-const POOL_ABI = [
-  {
-    inputs: [{ name: 'user', type: 'address' }],
-    name: 'getUserAccountData',
-    outputs: [
-      { name: 'totalCollateralBase', type: 'uint256' },
-      { name: 'totalDebtBase', type: 'uint256' },
-      { name: 'availableBorrowsBase', type: 'uint256' },
-      { name: 'currentLiquidationThreshold', type: 'uint256' },
-      { name: 'ltv', type: 'uint256' },
-      { name: 'healthFactor', type: 'uint256' },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'getReservesList',
-    outputs: [{ name: '', type: 'address[]' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [{ name: 'user', type: 'address' }],
-    name: 'getUserEMode',
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-] as const;
 
 const POOL_DATA_PROVIDER_ABI = [
   {
@@ -78,22 +47,6 @@ const POOL_DATA_PROVIDER_ABI = [
   },
 ] as const;
 
-const ERC20_ABI = [
-  {
-    inputs: [],
-    name: 'symbol',
-    outputs: [{ name: '', type: 'string' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'decimals',
-    outputs: [{ name: '', type: 'uint8' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-] as const;
 
 export class HealthFactorMonitor {
   private chain: ChainConfig;
@@ -125,7 +78,7 @@ export class HealthFactorMonitor {
     try {
       this.reservesList = await this.client.readContract({
         address: this.chain.aaveContracts.pool as `0x${string}`,
-        abi: POOL_ABI,
+        abi: AAVE_POOL_ABI,
         functionName: 'getReservesList',
       }) as string[];
 
@@ -206,7 +159,7 @@ export class HealthFactorMonitor {
     try {
       const data = (await this.client.readContract({
         address: this.chain.aaveContracts.pool as `0x${string}`,
-        abi: POOL_ABI,
+        abi: AAVE_POOL_ABI,
         functionName: 'getUserAccountData',
         args: [userAddress as `0x${string}`],
       })) as readonly [bigint, bigint, bigint, bigint, bigint, bigint];
@@ -241,7 +194,7 @@ export class HealthFactorMonitor {
       // Get E-Mode category ID
       const eModeCategoryId = await this.client.readContract({
         address: this.chain.aaveContracts.pool as `0x${string}`,
-        abi: POOL_ABI,
+        abi: AAVE_POOL_ABI,
         functionName: 'getUserEMode',
         args: [userAddress as `0x${string}`],
       }) as bigint;

@@ -1,8 +1,6 @@
 import { getAddress, type PublicClient, type WalletClient } from 'viem';
 import { CONFIG, type ChainConfig, type PairConfig } from '../../config';
-import { ERC20_ABI } from '../../plugins/kaspacom-dex/abi/erc20';
-import { PAIR_ABI } from '../../plugins/kaspacom-dex/abi/pair';
-import { VAULT_ABI } from '../../plugins/kaspacom-dex/abi/vault';
+import { ERC20_ABI, PAIR_ABI, VAULT_ABI } from '../../contracts/abis';
 import { ArbitrageEngine } from './arbitrage';
 import { PositionStore } from './positions';
 import { PairSnapshot, PairVolumeData, SmartLPManager } from './smart-lp';

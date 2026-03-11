@@ -1,11 +1,7 @@
 import { Tool } from "@goat-sdk/core";
 import type { EVMWalletClient } from "@goat-sdk/wallet-evm";
 import { formatUnits, parseUnits } from "viem";
-import { ERC20_ABI } from "./abi/erc20";
-import { FACTORY_ABI } from "./abi/factory";
-import { PAIR_ABI } from "./abi/pair";
-import { ROUTER_ABI } from "./abi/router";
-import { VAULT_ABI } from "./abi/vault";
+import { ERC20_ABI, FACTORY_ABI, PAIR_ABI, ROUTER_ABI, VAULT_ABI } from "../../contracts/abis";
 import {
   AddLiquidityParameters,
   GetPairReservesParameters,

@@ -6,7 +6,6 @@
   "private": true,
   "scripts": {
     "start": "tsx src/index-goat.ts",
-    "start:legacy": "tsx src/index.ts",
     "dev": "tsx watch src/index-goat.ts",
     "build": "tsc",
     "test": "vitest run",

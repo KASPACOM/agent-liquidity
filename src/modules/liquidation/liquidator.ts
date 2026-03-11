@@ -5,6 +5,7 @@
  */
 import { createWalletClient, createPublicClient, http, parseUnits, formatUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { AAVE_ORACLE_ABI, AAVE_POOL_ABI, ERC20_ABI } from '../../contracts/abis';
 import { PriceMonitor } from './price-monitor';
 import {
   ChainConfig,
@@ -14,56 +15,6 @@ import {
   ExecutionResult,
 } from './types';
 
-// ABIs
-const POOL_ABI = [
-  {
-    inputs: [
-      { name: 'collateralAsset', type: 'address' },
-      { name: 'debtAsset', type: 'address' },
-      { name: 'user', type: 'address' },
-      { name: 'debtToCover', type: 'uint256' },
-      { name: 'receiveAToken', type: 'bool' },
-    ],
-    name: 'liquidationCall',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-] as const;
-
-const ERC20_ABI = [
-  {
-    inputs: [
-      { name: 'spender', type: 'address' },
-      { name: 'amount', type: 'uint256' },
-    ],
-    name: 'approve',
-    outputs: [{ name: '', type: 'bool' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ name: 'account', type: 'address' }],
-    name: 'balanceOf',
-    outputs: [{ name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'symbol',
-    outputs: [{ name: '', type: 'string' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'decimals',
-    outputs: [{ name: '', type: 'uint8' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-] as const;
 
 export class Liquidator {
   private walletClients: Map<number, any> = new Map();
@@ -173,7 +124,7 @@ export class Liquidator {
         try {
           const wkasPrice = await publicClient.readContract({
             address: chain.aaveContracts.oracle as `0x${string}`,
-            abi: [{ inputs: [{ name: 'asset', type: 'address' }], name: 'getAssetPrice', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' }] as const,
+            abi: AAVE_ORACLE_ABI,
             functionName: 'getAssetPrice',
             args: [chain.wkasAddress as `0x${string}`],
           });
@@ -321,7 +272,7 @@ export class Liquidator {
 
       const txHash = await walletClient.writeContract({
         address: chain.aaveContracts.pool as `0x${string}`,
-        abi: POOL_ABI,
+        abi: AAVE_POOL_ABI,
         functionName: 'liquidationCall',
         args: [
           collateralAsset.address as `0x${string}`,
