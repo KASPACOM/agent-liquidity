@@ -6,9 +6,11 @@ interface PairConfig {
   tokenA: string;
   tokenB: string;
   pair: string;
+  tokenADecimals?: number;
+  tokenBDecimals?: number;
 }
 
-interface ChainConfig {
+export interface ChainConfig {
   name: string;
   chainId: number;
   enabled: boolean;
@@ -40,6 +42,12 @@ interface ChainConfig {
     maxGasPriceGwei: number;
     healthFactorThreshold: number;
     maxPositionsToMonitor: number;
+    liquidationBonusThreshold?: number;
+    gasLimitBuffer?: number;
+  };
+  monitoring?: {
+    scanIntervalSeconds: number;
+    enablePerformanceMonitoring: boolean;
   };
 }
 
@@ -150,4 +158,4 @@ export const CONFIG = {
   },
 };
 
-export type { ChainConfig, PairConfig };
+export type { PairConfig };

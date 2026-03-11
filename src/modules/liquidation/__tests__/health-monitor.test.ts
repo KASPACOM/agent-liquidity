@@ -8,6 +8,7 @@ function createChainConfig(aaveContracts: ChainConfig['aaveContracts']): ChainCo
     chainId: 1,
     enabled: true,
     rpcUrl: 'http://127.0.0.1:8545',
+    deployerKeyEnv: 'TEST_DEPLOYER_KEY',
     aaveContracts,
     strategy: {
       minProfitUsd: 50,

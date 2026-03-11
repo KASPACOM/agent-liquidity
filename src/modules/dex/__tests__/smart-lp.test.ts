@@ -11,6 +11,8 @@ function mockSnapshot(overrides: Partial<PairSnapshot> = {}): PairSnapshot {
     pairName: 'TEST/WKAS',
     token0: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     token1: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    token0Decimals: 18,
+    token1Decimals: 18,
     reserve0: 100_000n * 10n ** 18n,
     reserve1: 200_000n * 10n ** 18n,
     totalSupply: 1_000_000n * 10n ** 18n,

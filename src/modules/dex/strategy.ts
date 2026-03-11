@@ -1,5 +1,6 @@
 import { getAddress, type PublicClient, type WalletClient } from 'viem';
 import { CONFIG, type ChainConfig, type PairConfig } from '../../config';
+import { ERC20_ABI } from '../../plugins/kaspacom-dex/abi/erc20';
 import { PAIR_ABI } from '../../plugins/kaspacom-dex/abi/pair';
 import { VAULT_ABI } from '../../plugins/kaspacom-dex/abi/vault';
 import { ArbitrageEngine } from './arbitrage';
@@ -193,6 +194,31 @@ export class DexStrategyEngine {
             }),
           ]);
 
+          // Use decimals from subgraph discovery if available, otherwise RPC fallback
+          let token0Decimals: number;
+          let token1Decimals: number;
+          if (pairConfig.tokenADecimals != null && pairConfig.tokenBDecimals != null) {
+            // Subgraph-discovered pairs already carry decimals
+            token0Decimals = pairConfig.tokenADecimals;
+            token1Decimals = pairConfig.tokenBDecimals;
+          } else {
+            // Config-defined pairs: fetch from chain (2 RPC calls)
+            const [d0, d1] = await Promise.all([
+              this.client.readContract({
+                address: token0 as `0x${string}`,
+                abi: ERC20_ABI,
+                functionName: 'decimals',
+              }),
+              this.client.readContract({
+                address: token1 as `0x${string}`,
+                abi: ERC20_ABI,
+                functionName: 'decimals',
+              }),
+            ]);
+            token0Decimals = Number(d0);
+            token1Decimals = Number(d1);
+          }
+
           const vaultAddress = getAddress(this.chain.vaultAddress!) as `0x${string}`;
           const [vaultToken0Balance, vaultToken1Balance] = await Promise.all([
             this.client.readContract({
@@ -219,6 +245,8 @@ export class DexStrategyEngine {
             pairName: pairConfig.name,
             token0,
             token1,
+            token0Decimals,
+            token1Decimals,
             reserve0,
             reserve1,
             totalSupply: totalSupply as bigint,
@@ -547,12 +575,14 @@ export class DexStrategyEngine {
       p => Number(p.reserveKAS) >= MIN_PAIR_LIQUIDITY_KAS,
     );
 
-    // Convert to PairConfig format
+    // Convert to PairConfig format (carry decimals from subgraph)
     this.discoveredPairs = liquidPairs.map(p => ({
       name: `${p.token0.symbol}/${p.token1.symbol}`,
       tokenA: p.token0.id,
       tokenB: p.token1.id,
       pair: p.id,
+      tokenADecimals: Number(p.token0.decimals),
+      tokenBDecimals: Number(p.token1.decimals),
     }));
 
     console.log(

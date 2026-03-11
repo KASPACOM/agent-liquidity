@@ -1,4 +1,4 @@
-import { parseUnits } from 'viem';
+import { parseUnits, formatUnits } from 'viem';
 import { getAmountOut } from './math';
 import type { PairSnapshot } from './smart-lp';
 
@@ -24,6 +24,7 @@ interface NormalizedPair {
   reserveQuote: bigint;
   priceAssetInQuote: number;
   quoteBalance: bigint;
+  quoteDecimals: number;
 }
 
 export class ArbitrageEngine {
@@ -112,6 +113,7 @@ export class ArbitrageEngine {
         reserveQuote: pair.reserve1,
         priceAssetInQuote: pair.price0in1,
         quoteBalance: pair.vaultToken1Balance,
+        quoteDecimals: pair.token1Decimals,
       };
     }
 
@@ -123,11 +125,14 @@ export class ArbitrageEngine {
       reserveQuote: pair.reserve0,
       priceAssetInQuote: pair.price1in0,
       quoteBalance: pair.vaultToken0Balance,
+      quoteDecimals: pair.token0Decimals,
     };
   }
 
   private getOptimalInput(buyPair: NormalizedPair, sellPair: NormalizedPair): bigint {
     const maxBalance = buyPair.quoteBalance / 4n;
+    const decimals = buyPair.quoteDecimals;
+
     if (
       buyPair.reserveQuote <= 0n ||
       buyPair.reserveAsset <= 0n ||
@@ -138,10 +143,10 @@ export class ArbitrageEngine {
       return 0n;
     }
 
-    const reserveA1 = this.toDecimal(buyPair.reserveQuote);
-    const reserveB1 = this.toDecimal(buyPair.reserveAsset);
-    const reserveB2 = this.toDecimal(sellPair.reserveAsset);
-    const reserveA2 = this.toDecimal(sellPair.reserveQuote);
+    const reserveA1 = this.toDecimal(buyPair.reserveQuote, decimals);
+    const reserveB1 = this.toDecimal(buyPair.reserveAsset, decimals);
+    const reserveB2 = this.toDecimal(sellPair.reserveAsset, decimals);
+    const reserveA2 = this.toDecimal(sellPair.reserveQuote, decimals);
     const feeMultiplier = 0.99;
     const numerator =
       feeMultiplier * Math.sqrt(reserveA1 * reserveA2 * reserveB1 * reserveB2) -
@@ -155,14 +160,14 @@ export class ArbitrageEngine {
     const optimal = numerator / denominator;
     if (optimal <= 0) return 0n;
 
-    const capped = Math.min(optimal, this.toDecimal(maxBalance));
+    const capped = Math.min(optimal, this.toDecimal(maxBalance, decimals));
     if (capped <= 0) return 0n;
 
-    return parseUnits(capped.toFixed(18), 18);
+    return parseUnits(capped.toFixed(decimals), decimals);
   }
 
-  private toDecimal(value: bigint): number {
-    return Number(value) / 1e18;
+  private toDecimal(value: bigint, decimals: number): number {
+    return Number(formatUnits(value, decimals));
   }
 }
 

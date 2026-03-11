@@ -1,36 +1,9 @@
 /**
  * Liquidation Module Types
- * Ported from Aave V3 liquidation bot to use viem instead of ethers v5
  */
 
-// Chain configuration interface
-export interface ChainConfig {
-  name: string;
-  chainId: number;
-  enabled: boolean;
-  rpcUrl: string;
-  // Subgraph URLs
-  graphNodeUrl?: string;
-  tokenGraphUrl?: string;
-  aaveSubgraphUrl?: string;
-  aaveContracts: {
-    pool: string;
-    poolDataProvider: string;
-    oracle: string;
-  } | null;
-  strategy?: {
-    minProfitUsd: number;
-    maxGasPriceGwei: number;
-    healthFactorThreshold: number;
-    maxPositionsToMonitor: number;
-    liquidationBonusThreshold?: number;
-    gasLimitBuffer?: number;
-  };
-  monitoring?: {
-    scanIntervalSeconds: number;
-    enablePerformanceMonitoring: boolean;
-  };
-}
+// Re-export ChainConfig from the canonical config module to avoid duplication
+export type { ChainConfig } from '../../config';
 
 // User account data from Aave
 export interface UserAccountData {

@@ -23,6 +23,8 @@ const PRICE_ORACLE_ABI = [
   },
 ] as const;
 
+const PRICE_CACHE_TTL_MS = 30_000; // 30 seconds
+
 export class PriceMonitor {
   private clients: Map<number, PublicClient> = new Map();
   private priceCache: Map<string, PriceData> = new Map();
@@ -62,6 +64,13 @@ export class PriceMonitor {
       throw new Error(`Client not initialized for chain ${chain.chainId}`);
     }
 
+    // Check cache first (with TTL)
+    const cacheKey = `${chain.chainId}-${assetAddress}`;
+    const cached = this.priceCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < PRICE_CACHE_TTL_MS) {
+      return cached;
+    }
+
     // Get price from Aave Oracle
     const aaveOraclePrice = await client.readContract({
       address: chain.aaveContracts.oracle as `0x${string}`,
@@ -77,7 +86,6 @@ export class PriceMonitor {
     };
 
     // Cache the price data
-    const cacheKey = `${chain.chainId}-${assetAddress}`;
     this.priceCache.set(cacheKey, priceData);
 
     return priceData;

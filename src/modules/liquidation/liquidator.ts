@@ -162,13 +162,27 @@ export class Liquidator {
       // Calculate profit
       const grossProfitUsd = collateralAmountUsd - debtAmountUsd;
 
-      // Estimate gas cost
+      // Estimate gas cost using WKAS oracle price
       const gasPrice = await publicClient.getGasPrice();
       const gasLimit = 500000n;
       const gasCostWei = gasPrice * gasLimit;
 
-      // Get native token price for gas cost calculation (simplified - assume 2000 USD)
-      const gasCostUsd = parseFloat(formatUnits(gasCostWei, 18)) * 2000;
+      // Get native token (iKAS/WKAS) price from oracle for accurate gas cost
+      let nativeTokenPriceUsd = 0.03; // fallback
+      if (chain.aaveContracts && chain.wkasAddress) {
+        try {
+          const wkasPrice = await publicClient.readContract({
+            address: chain.aaveContracts.oracle as `0x${string}`,
+            abi: [{ inputs: [{ name: 'asset', type: 'address' }], name: 'getAssetPrice', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' }] as const,
+            functionName: 'getAssetPrice',
+            args: [chain.wkasAddress as `0x${string}`],
+          });
+          nativeTokenPriceUsd = parseFloat(formatUnits(wkasPrice, 8));
+        } catch {
+          // fallback to default
+        }
+      }
+      const gasCostUsd = parseFloat(formatUnits(gasCostWei, 18)) * nativeTokenPriceUsd;
 
       // Calculate net profit
       const netProfitUsd = grossProfitUsd - gasCostUsd;
