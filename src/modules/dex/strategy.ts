@@ -5,12 +5,39 @@ import { VAULT_ABI } from '../../plugins/kaspacom-dex/abi/vault';
 import { ArbitrageEngine } from './arbitrage';
 import { PositionStore } from './positions';
 import { PairSnapshot, PairVolumeData, SmartLPManager } from './smart-lp';
+import { SubgraphClient, QUERIES } from '../subgraph';
 
 interface PairApiRecord {
   pairAddress?: string;
   pairName?: string;
   dailyVolume: number;
 }
+
+/** Subgraph pair data shape */
+interface SubgraphPair {
+  id: string;
+  token0: { id: string; symbol: string; decimals: string };
+  token1: { id: string; symbol: string; decimals: string };
+  reserveKAS: string;
+  reserve0: string;
+  reserve1: string;
+  totalSupply: string;
+  volumeKAS: string;
+}
+
+interface SubgraphPairDayData {
+  pairAddress: string;
+  date: number;
+  dailyVolumeKAS: string;
+  dailyTxns: string;
+  reserveKAS: string;
+}
+
+/** Minimum liquidity (in KAS) to consider a pair for trading. */
+const MIN_PAIR_LIQUIDITY_KAS = 1000;
+
+/** How often to re-discover pairs (every N cycles = N * 30s). */
+const PAIR_DISCOVERY_INTERVAL = 50; // ~25 minutes
 
 type VaultWriteRequest =
   | {
@@ -37,15 +64,40 @@ export class DexStrategyEngine {
   private readonly smartLp = new SmartLPManager(this.positionStore);
   private readonly arbitrage = new ArbitrageEngine();
 
+  // Subgraph-based pair discovery
+  private dexSubgraphClient?: SubgraphClient;
+  private discoveredPairs: PairConfig[] = [];
+  private cyclesSincePairRefresh = PAIR_DISCOVERY_INTERVAL; // trigger on first cycle
+  private subgraphVolumeCache: Map<string, number> = new Map(); // pairAddress -> dailyVolKAS
+
   constructor(
     private readonly client: DexClient,
     private readonly chain: ChainConfig
-  ) {}
+  ) {
+    // Initialize subgraph client if URL is available
+    if (chain.graphNodeUrl) {
+      this.dexSubgraphClient = new SubgraphClient(chain.graphNodeUrl);
+      console.log(`   📊 [DEX] Subgraph client initialized: ${chain.graphNodeUrl}`);
+    }
+  }
 
   async cycle(): Promise<void> {
-    if (!this.chain.vaultAddress || !this.chain.pairs?.length) return;
+    if (!this.chain.vaultAddress) return;
 
-    const pairSnapshots = await this.loadPairSnapshots(this.chain.pairs);
+    // Discover/refresh pairs from subgraph
+    await this.maybeDiscoverPairs();
+
+    // Use discovered pairs if available, fall back to config
+    const activePairs = this.discoveredPairs.length > 0
+      ? this.discoveredPairs
+      : (this.chain.pairs ?? []);
+
+    if (activePairs.length === 0) {
+      console.log('   ⚠️  [DEX] No pairs available (config empty, subgraph unavailable or no liquidity)');
+      return;
+    }
+
+    const pairSnapshots = await this.loadPairSnapshots(activePairs);
     if (pairSnapshots.length === 0) {
       console.log('   ⚠️  [DEX] No live pair snapshots available');
       return;
@@ -188,6 +240,16 @@ export class DexStrategyEngine {
   }
 
   private async fetchPairVolumes(): Promise<Map<string, PairApiRecord>> {
+    // Prefer subgraph volume data if available
+    if (this.subgraphVolumeCache.size > 0) {
+      const volumeMap = new Map<string, PairApiRecord>();
+      for (const [addr, volume] of this.subgraphVolumeCache) {
+        volumeMap.set(addr.toLowerCase(), { pairAddress: addr, dailyVolume: volume });
+      }
+      return volumeMap;
+    }
+
+    // Fallback: external API
     const url = `${CONFIG.apiBaseUrl}/dex/pairs?network=${CONFIG.network}`;
 
     try {
@@ -442,5 +504,90 @@ export class DexStrategyEngine {
 
   private deadline(): bigint {
     return BigInt(Math.floor(Date.now() / 1000) + 600);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Subgraph-based pair discovery
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Discover pairs from the DEX subgraph if enough cycles have passed.
+   */
+  private async maybeDiscoverPairs(): Promise<void> {
+    this.cyclesSincePairRefresh++;
+    if (this.cyclesSincePairRefresh < PAIR_DISCOVERY_INTERVAL) return;
+
+    if (!this.dexSubgraphClient) return;
+
+    try {
+      await this.discoverPairsFromSubgraph();
+      await this.refreshSubgraphVolumes();
+      this.cyclesSincePairRefresh = 0;
+    } catch (error) {
+      console.warn(
+        `   ⚠️  [DEX] Subgraph pair discovery failed (using cached/config pairs):`,
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  /**
+   * Query the DEX subgraph for all pairs and filter by minimum liquidity.
+   */
+  private async discoverPairsFromSubgraph(): Promise<void> {
+    if (!this.dexSubgraphClient) return;
+
+    const allPairs = await this.dexSubgraphClient.paginate<SubgraphPair>(
+      QUERIES.ALL_PAIRS,
+      'pairs',
+    );
+
+    // Filter by minimum liquidity
+    const liquidPairs = allPairs.filter(
+      p => Number(p.reserveKAS) >= MIN_PAIR_LIQUIDITY_KAS,
+    );
+
+    // Convert to PairConfig format
+    this.discoveredPairs = liquidPairs.map(p => ({
+      name: `${p.token0.symbol}/${p.token1.symbol}`,
+      tokenA: p.token0.id,
+      tokenB: p.token1.id,
+      pair: p.id,
+    }));
+
+    console.log(
+      `   📊 [DEX] Subgraph: discovered ${liquidPairs.length}/${allPairs.length} pairs ` +
+        `(min ${MIN_PAIR_LIQUIDITY_KAS} KAS liquidity)`,
+    );
+  }
+
+  /**
+   * Fetch recent daily volume per pair from the subgraph.
+   */
+  private async refreshSubgraphVolumes(): Promise<void> {
+    if (!this.dexSubgraphClient) return;
+
+    const oneDayAgo = Math.floor(Date.now() / 1000) - 86400;
+
+    try {
+      const dayDatas = await this.dexSubgraphClient.paginate<SubgraphPairDayData>(
+        QUERIES.PAIR_DAY_DATA,
+        'pairDayDatas',
+        { minDate: oneDayAgo },
+      );
+
+      // Aggregate daily volume per pair
+      this.subgraphVolumeCache.clear();
+      for (const d of dayDatas) {
+        const addr = d.pairAddress.toLowerCase();
+        const existing = this.subgraphVolumeCache.get(addr) ?? 0;
+        this.subgraphVolumeCache.set(addr, existing + Number(d.dailyVolumeKAS));
+      }
+    } catch (error) {
+      console.warn(
+        `   ⚠️  [DEX] Subgraph volume fetch failed:`,
+        error instanceof Error ? error.message : error,
+      );
+    }
   }
 }

@@ -10,6 +10,15 @@ import {
   LiquidationTarget,
   ExecutionResult,
 } from './types';
+import { SubgraphClient, QUERIES } from '../subgraph';
+
+/** How often to refresh borrower addresses (every N cycles = N * 30s). */
+const BORROWER_REFRESH_INTERVAL = 10; // ~5 minutes
+
+interface SubgraphBorrower {
+  id: string;
+  borrowedReservesCount: number;
+}
 
 export class StrategyManager {
   private isRunning = false;
@@ -19,6 +28,10 @@ export class StrategyManager {
   private lastExecutionTime: Map<number, number> = new Map();
   private executionHistory: ExecutionResult[] = [];
   private executionCooldown = 60000; // 1 minute in ms
+
+  // Subgraph clients per chain (for borrower discovery)
+  private aaveSubgraphClients: Map<number, SubgraphClient> = new Map();
+  private cyclesSinceRefresh: Map<number, number> = new Map();
 
   constructor() {
     this.liquidator = new Liquidator();
@@ -49,6 +62,19 @@ export class StrategyManager {
       // Initialize known addresses
       this.knownAddresses.set(chain.chainId, []);
       this.lastExecutionTime.set(chain.chainId, 0);
+      this.cyclesSinceRefresh.set(chain.chainId, BORROWER_REFRESH_INTERVAL); // trigger on first cycle
+
+      // Initialize subgraph client for borrower discovery
+      if (chain.aaveSubgraphUrl) {
+        const client = new SubgraphClient(chain.aaveSubgraphUrl);
+        this.aaveSubgraphClients.set(chain.chainId, client);
+        console.log(`[${chain.name}] Aave subgraph client initialized: ${chain.aaveSubgraphUrl}`);
+
+        // Discover borrowers on startup
+        await this.discoverBorrowers(chain);
+      } else {
+        console.warn(`[${chain.name}] No AAVE_SUBGRAPH_URL — borrower discovery disabled. Use addAddressesToMonitor() manually.`);
+      }
 
       console.log(`Strategy manager initialized for chain: ${chain.name} (${chain.chainId})`);
     }
@@ -66,6 +92,9 @@ export class StrategyManager {
 
     for (const chain of enabledChains) {
       try {
+        // Periodically refresh borrower addresses from subgraph
+        await this.maybeRefreshBorrowers(chain);
+
         // Scan for liquidation opportunities
         await this.scanForOpportunities(chain);
 
@@ -74,6 +103,54 @@ export class StrategyManager {
       } catch (error) {
         console.error(`[${chain.name}] Error processing chain:`, error);
       }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Subgraph-based borrower discovery
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Discover all active borrowers from the Aave V3 subgraph.
+   * Paginates through all results and populates knownAddresses.
+   */
+  private async discoverBorrowers(chain: ChainConfig): Promise<void> {
+    const client = this.aaveSubgraphClients.get(chain.chainId);
+    if (!client) return;
+
+    try {
+      const borrowers = await client.paginate<SubgraphBorrower>(
+        QUERIES.ACTIVE_BORROWERS,
+        'users',
+      );
+
+      const addresses = borrowers.map(b => b.id);
+
+      if (addresses.length > 0) {
+        this.addAddressesToMonitor(chain.chainId, addresses);
+        console.log(`[${chain.name}] Subgraph: discovered ${addresses.length} active borrowers`);
+      } else {
+        console.log(`[${chain.name}] Subgraph: no active borrowers found`);
+      }
+
+      this.cyclesSinceRefresh.set(chain.chainId, 0);
+    } catch (error) {
+      console.warn(
+        `[${chain.name}] Subgraph borrower discovery failed (will retry next interval):`,
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  /**
+   * Refresh borrower addresses if enough cycles have passed.
+   */
+  private async maybeRefreshBorrowers(chain: ChainConfig): Promise<void> {
+    const count = (this.cyclesSinceRefresh.get(chain.chainId) ?? 0) + 1;
+    this.cyclesSinceRefresh.set(chain.chainId, count);
+
+    if (count >= BORROWER_REFRESH_INTERVAL) {
+      await this.discoverBorrowers(chain);
     }
   }
 
