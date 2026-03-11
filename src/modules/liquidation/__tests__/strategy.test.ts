@@ -8,6 +8,7 @@ function createChain(overrides: Partial<ChainConfig> = {}): ChainConfig {
     chainId: 1,
     enabled: true,
     rpcUrl: 'http://127.0.0.1:8545',
+    deployerKeyEnv: 'TEST_DEPLOYER_KEY',
     aaveContracts: {
       pool: '0x1111111111111111111111111111111111111111',
       poolDataProvider: '0x2222222222222222222222222222222222222222',

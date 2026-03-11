@@ -7,6 +7,8 @@ export interface PairSnapshot {
   pairName: string;
   token0: `0x${string}`;
   token1: `0x${string}`;
+  token0Decimals: number;
+  token1Decimals: number;
   reserve0: bigint;
   reserve1: bigint;
   totalSupply: bigint;

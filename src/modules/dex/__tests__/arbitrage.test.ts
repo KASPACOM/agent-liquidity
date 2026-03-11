@@ -8,6 +8,8 @@ function mockPair(overrides: Partial<PairSnapshot> = {}): PairSnapshot {
     pairName: 'PAIR-1',
     token0: '0x1111111111111111111111111111111111111111',
     token1: '0x9999999999999999999999999999999999999999',
+    token0Decimals: 18,
+    token1Decimals: 18,
     reserve0: 1_000n * 10n ** 18n,
     reserve1: 2_000n * 10n ** 18n,
     totalSupply: 1_000_000n * 10n ** 18n,

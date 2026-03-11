@@ -45,6 +45,7 @@ describe('liquidation types', () => {
   it('constructs a valid ChainConfig with Aave contracts', () => {
     const chain: ChainConfig = {
       name: 'Kasplex',
+      deployerKeyEnv: 'TEST_KEY',
       chainId: 167_000,
       enabled: true,
       rpcUrl: 'http://127.0.0.1:8545',
@@ -71,6 +72,7 @@ describe('liquidation types', () => {
   it('constructs a valid ChainConfig without Aave contracts', () => {
     const chain: ChainConfig = {
       name: 'NoAave',
+      deployerKeyEnv: 'TEST_KEY',
       chainId: 999,
       enabled: true,
       rpcUrl: 'http://127.0.0.1:8545',
