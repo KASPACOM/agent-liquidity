@@ -17,6 +17,9 @@ export interface ChainConfig {
   rpcUrl: string;
   deployerKeyEnv: string; // env var name for this chain's deployer key
 
+  // Gas price override (wei) — required for chains like Galleon that reject low gas prices
+  gasPriceWei?: bigint;
+
   // DEX contracts
   vaultAddress?: string;
   routerAddress?: string;
@@ -75,6 +78,7 @@ export const CONFIG = {
       enabled: !!(process.env.IGRA_DEPLOYER_PRIVATE_KEY),
       rpcUrl: process.env.IGRA_RPC_URL || 'https://galleon-testnet.igralabs.com:8545',
       deployerKeyEnv: 'IGRA_DEPLOYER_PRIVATE_KEY',
+      gasPriceWei: 2_000_000_000_001n, // 2 twei + 1 — Galleon requires strictly > 2 twei
 
       // DEX contracts
       vaultAddress: process.env.IGRA_VAULT_ADDRESS || '0xa3ED9723EbCb88916b1f80c3988A13a49cd372E5',

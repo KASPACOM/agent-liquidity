@@ -114,9 +114,9 @@ export class Liquidator {
       const grossProfitUsd = collateralAmountUsd - debtAmountUsd;
 
       // Estimate gas cost using WKAS oracle price
-      const gasPrice = await publicClient.getGasPrice();
+      const estimatedGasPrice = chain.gasPriceWei ?? await publicClient.getGasPrice();
       const gasLimit = 500000n;
-      const gasCostWei = gasPrice * gasLimit;
+      const gasCostWei = estimatedGasPrice * gasLimit;
 
       // Get native token (iKAS/WKAS) price from oracle for accurate gas cost
       let nativeTokenPriceUsd = 0.03; // fallback
@@ -238,25 +238,31 @@ export class Liquidator {
           `  Expected Profit: $${calculation.netProfitUsd.toFixed(2)}`
       );
 
+      // Determine gas price: use chain override or fetch from network
+      const gasPrice = chain.gasPriceWei ?? await publicClient.getGasPrice();
+
       // Approve tokens to be spent by the pool
       const approveHash = await walletClient.writeContract({
         address: debtAsset.address as `0x${string}`,
         abi: ERC20_ABI,
         functionName: 'approve',
         args: [chain.aaveContracts.pool as `0x${string}`, debtToCover],
+        gasPrice,
       });
 
       console.log(`[${chain.name}] Approval transaction sent: ${approveHash}`);
       await publicClient.waitForTransactionReceipt({ hash: approveHash });
       console.log(`[${chain.name}] Approval confirmed`);
 
-      // Check gas price
-      const currentGasPrice = await publicClient.getGasPrice();
+      // Check gas price against maximum
+      const networkGasPrice = await publicClient.getGasPrice();
+      const effectiveGasPrice = chain.gasPriceWei ?? networkGasPrice;
       const maxGasPrice = parseUnits((chain.strategy?.maxGasPriceGwei || 100).toString(), 9);
 
-      if (currentGasPrice > maxGasPrice) {
+      // Only check against max if using network gas price (not chain override)
+      if (!chain.gasPriceWei && networkGasPrice > maxGasPrice) {
         console.warn(
-          `[${chain.name}] Current gas price (${formatUnits(currentGasPrice, 9)} gwei) ` +
+          `[${chain.name}] Current gas price (${formatUnits(networkGasPrice, 9)} gwei) ` +
             `exceeds maximum (${chain.strategy?.maxGasPriceGwei || 100} gwei)`
         );
         return {
@@ -282,7 +288,7 @@ export class Liquidator {
           false,
         ],
         gas: gasLimit,
-        gasPrice: currentGasPrice,
+        gasPrice: effectiveGasPrice,
       });
 
       console.log(`[${chain.name}] Liquidation transaction sent: ${txHash}`);
