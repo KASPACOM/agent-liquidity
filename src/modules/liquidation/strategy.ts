@@ -201,7 +201,7 @@ export class StrategyManager {
       // Iterate through all debt assets and check profitability with each collateral asset
       for (const debtAsset of target.debtAssets) {
         // Check if we have balance for this debt asset
-        const balance = await this.liquidator.checkBalance(chain, debtAsset.address);
+        const balance = await this.liquidator.checkVaultBalance(chain, debtAsset.address);
 
         if (balance === 0n) {
           continue;
@@ -266,7 +266,7 @@ export class StrategyManager {
       for (const position of liquidatablePositions) {
         for (const debtAsset of position.debtAssets) {
           // Check if we have balance for this debt asset
-          const balance = await this.liquidator.checkBalance(chain, debtAsset.address);
+          const balance = await this.liquidator.checkVaultBalance(chain, debtAsset.address);
 
           if (balance === 0n) {
             continue;
@@ -300,7 +300,7 @@ export class StrategyManager {
       let successCount = 0;
       for (const opportunity of opportunities) {
         // Re-check balance before each execution (previous liquidation may have spent tokens)
-        const currentBalance = await this.liquidator.checkBalance(chain, opportunity.debtAsset.address);
+        const currentBalance = await this.liquidator.checkVaultBalance(chain, opportunity.debtAsset.address);
         if (currentBalance < opportunity.debtToCover) {
           console.log(
             `[${chain.name}] Skipping ${opportunity.target.user} — insufficient ${opportunity.debtAsset.symbol} ` +
