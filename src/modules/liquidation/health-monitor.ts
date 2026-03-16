@@ -6,6 +6,32 @@ import { createPublicClient, http, PublicClient, parseUnits, formatUnits } from 
 import { AAVE_POOL_ABI, ERC20_ABI } from '../../contracts/abis';
 import { ChainConfig, UserAccountData, LiquidationTarget, Asset } from './types';
 
+/**
+ * Retry wrapper for RPC calls with exponential backoff.
+ * Handles intermittent RPC reverts (observed on Galleon testnet from k8s).
+ */
+async function retryRpc<T>(
+  fn: () => Promise<T>,
+  label: string,
+  maxRetries: number = 3,
+  baseDelayMs: number = 500,
+): Promise<T> {
+  let lastError: Error | undefined;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt);
+        console.warn(`[retryRpc] ${label} attempt ${attempt + 1}/${maxRetries + 1} failed, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError!;
+}
+
 const POOL_DATA_PROVIDER_ABI = [
   {
     inputs: [
@@ -76,11 +102,14 @@ export class HealthFactorMonitor {
     if (!this.chain.aaveContracts) return;
 
     try {
-      this.reservesList = await this.client.readContract({
-        address: this.chain.aaveContracts.pool as `0x${string}`,
-        abi: AAVE_POOL_ABI,
-        functionName: 'getReservesList',
-      }) as string[];
+      this.reservesList = await retryRpc(
+        () => this.client.readContract({
+          address: this.chain.aaveContracts!.pool as `0x${string}`,
+          abi: AAVE_POOL_ABI,
+          functionName: 'getReservesList',
+        }),
+        'getReservesList',
+      ) as string[];
 
       console.log(`[${this.chain.name}] Loaded ${this.reservesList.length} reserves`);
 
@@ -107,25 +136,34 @@ export class HealthFactorMonitor {
 
     try {
       // Get reserve configuration data
-      const configData = (await this.client.readContract({
-        address: this.chain.aaveContracts.poolDataProvider as `0x${string}`,
-        abi: POOL_DATA_PROVIDER_ABI,
-        functionName: 'getReserveConfigurationData',
-        args: [asset as `0x${string}`],
-      })) as readonly [bigint, bigint, bigint, bigint, bigint, boolean, boolean, boolean, boolean, boolean];
+      const configData = await retryRpc(
+        () => this.client.readContract({
+          address: this.chain.aaveContracts!.poolDataProvider as `0x${string}`,
+          abi: POOL_DATA_PROVIDER_ABI,
+          functionName: 'getReserveConfigurationData',
+          args: [asset as `0x${string}`],
+        }),
+        `getReserveConfigurationData(${asset.slice(0, 10)}...)`,
+      ) as readonly [bigint, bigint, bigint, bigint, bigint, boolean, boolean, boolean, boolean, boolean];
 
       // Get token symbol and decimals
       const [symbol, decimals] = await Promise.all([
-        this.client.readContract({
-          address: asset as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: 'symbol',
-        }) as Promise<string>,
-        this.client.readContract({
-          address: asset as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: 'decimals',
-        }) as Promise<number>,
+        retryRpc(
+          () => this.client.readContract({
+            address: asset as `0x${string}`,
+            abi: ERC20_ABI,
+            functionName: 'symbol',
+          }),
+          `symbol(${asset.slice(0, 10)}...)`,
+        ) as Promise<string>,
+        retryRpc(
+          () => this.client.readContract({
+            address: asset as `0x${string}`,
+            abi: ERC20_ABI,
+            functionName: 'decimals',
+          }),
+          `decimals(${asset.slice(0, 10)}...)`,
+        ) as Promise<number>,
       ]);
 
       this.tokenSymbols.set(asset, symbol);
@@ -157,12 +195,15 @@ export class HealthFactorMonitor {
     }
 
     try {
-      const data = (await this.client.readContract({
-        address: this.chain.aaveContracts.pool as `0x${string}`,
-        abi: AAVE_POOL_ABI,
-        functionName: 'getUserAccountData',
-        args: [userAddress as `0x${string}`],
-      })) as readonly [bigint, bigint, bigint, bigint, bigint, bigint];
+      const data = await retryRpc(
+        () => this.client.readContract({
+          address: this.chain.aaveContracts!.pool as `0x${string}`,
+          abi: AAVE_POOL_ABI,
+          functionName: 'getUserAccountData',
+          args: [userAddress as `0x${string}`],
+        }),
+        `getUserAccountData(${userAddress.slice(0, 10)}...)`,
+      ) as readonly [bigint, bigint, bigint, bigint, bigint, bigint];
 
       return {
         totalCollateralBase: data[0],
@@ -174,7 +215,7 @@ export class HealthFactorMonitor {
         user: userAddress,
       };
     } catch (error) {
-      console.error(`[${this.chain.name}] Failed to get user account data for ${userAddress}:`, error);
+      console.error(`[${this.chain.name}] Failed to get user account data for ${userAddress} (after retries):`, error);
       throw error;
     }
   }
@@ -192,12 +233,15 @@ export class HealthFactorMonitor {
       const accountData = await this.getUserAccountData(userAddress);
 
       // Get E-Mode category ID
-      const eModeCategoryId = await this.client.readContract({
-        address: this.chain.aaveContracts.pool as `0x${string}`,
-        abi: AAVE_POOL_ABI,
-        functionName: 'getUserEMode',
-        args: [userAddress as `0x${string}`],
-      }) as bigint;
+      const eModeCategoryId = await retryRpc(
+        () => this.client.readContract({
+          address: this.chain.aaveContracts!.pool as `0x${string}`,
+          abi: AAVE_POOL_ABI,
+          functionName: 'getUserEMode',
+          args: [userAddress as `0x${string}`],
+        }),
+        `getUserEMode(${userAddress.slice(0, 10)}...)`,
+      ) as bigint;
 
       // Initialize arrays for collateral and debt assets
       const collateralAssets: Asset[] = [];
@@ -205,12 +249,15 @@ export class HealthFactorMonitor {
 
       // Check each reserve to see if the user has collateral or debt
       for (const asset of this.reservesList) {
-        const userReserveData = (await this.client.readContract({
-          address: this.chain.aaveContracts.poolDataProvider as `0x${string}`,
-          abi: POOL_DATA_PROVIDER_ABI,
-          functionName: 'getUserReserveData',
-          args: [asset as `0x${string}`, userAddress as `0x${string}`],
-        })) as readonly [bigint, bigint, bigint, bigint, bigint, bigint, bigint, number, boolean];
+        const userReserveData = await retryRpc(
+          () => this.client.readContract({
+            address: this.chain.aaveContracts!.poolDataProvider as `0x${string}`,
+            abi: POOL_DATA_PROVIDER_ABI,
+            functionName: 'getUserReserveData',
+            args: [asset as `0x${string}`, userAddress as `0x${string}`],
+          }),
+          `getUserReserveData(${asset.slice(0, 10)}..., ${userAddress.slice(0, 10)}...)`,
+        ) as readonly [bigint, bigint, bigint, bigint, bigint, bigint, bigint, number, boolean];
 
         const currentATokenBalance = userReserveData[0];
         const currentStableDebt = userReserveData[1];
