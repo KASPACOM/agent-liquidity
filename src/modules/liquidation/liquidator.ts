@@ -1,11 +1,11 @@
 /**
  * Core Liquidator for Aave V3
  * Ported from ethers v5 to viem
- * Supports direct liquidation (requires debt token in wallet)
+ * Supports direct liquidation through the configured vault
  */
 import { createWalletClient, createPublicClient, http, parseUnits, formatUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { AAVE_ORACLE_ABI, AAVE_POOL_ABI, ERC20_ABI } from '../../contracts/abis';
+import { AAVE_ORACLE_ABI, ERC20_ABI, VAULT_ABI } from '../../contracts/abis';
 import { PriceMonitor } from './price-monitor';
 import {
   ChainConfig,
@@ -183,8 +183,55 @@ export class Liquidator {
   }
 
   /**
+   * Check vault balance for a specific token
+   */
+  public async checkVaultBalance(chain: ChainConfig, tokenAddress: string): Promise<bigint> {
+    const publicClient = this.publicClients.get(chain.chainId);
+
+    if (!publicClient) {
+      throw new Error(`Public client not initialized for chain ${chain.chainId}`);
+    }
+
+    if (!chain.vaultAddress) {
+      throw new Error(`Chain ${chain.name} has no vault configured`);
+    }
+
+    return (await publicClient.readContract({
+      address: chain.vaultAddress as `0x${string}`,
+      abi: VAULT_ABI,
+      functionName: 'getTokenBalance',
+      args: [tokenAddress as `0x${string}`],
+    })) as bigint;
+  }
+
+  /**
+   * Read on-chain liquidation stats from the vault
+   */
+  public async getLiquidationStats(
+    chain: ChainConfig
+  ): Promise<{ count: bigint; profit: bigint }> {
+    const publicClient = this.publicClients.get(chain.chainId);
+
+    if (!publicClient) {
+      throw new Error(`Public client not initialized for chain ${chain.chainId}`);
+    }
+
+    if (!chain.vaultAddress) {
+      throw new Error(`Chain ${chain.name} has no vault configured`);
+    }
+
+    const [count, profit] = (await publicClient.readContract({
+      address: chain.vaultAddress as `0x${string}`,
+      abi: VAULT_ABI,
+      functionName: 'getLiquidationStats',
+    })) as [bigint, bigint];
+
+    return { count, profit };
+  }
+
+  /**
    * Execute direct liquidation (without flash loan)
-   * This requires having the debt token already in the wallet
+   * This requires having the debt token already in the vault
    */
   public async executeDirectLiquidation(
     chain: ChainConfig,
@@ -209,8 +256,12 @@ export class Liquidator {
         throw new Error(`Chain ${chain.chainId} not initialized`);
       }
 
+      if (!chain.vaultAddress) {
+        throw new Error(`Chain ${chain.name} has no vault configured`);
+      }
+
       // Check if we have enough balance
-      const debtTokenBalance = await this.checkBalance(chain, debtAsset.address);
+      const debtTokenBalance = await this.checkVaultBalance(chain, debtAsset.address);
 
       if (debtTokenBalance < debtToCover) {
         const balanceFormatted = formatUnits(debtTokenBalance, debtAsset.decimals);
@@ -241,19 +292,6 @@ export class Liquidator {
       // Determine gas price: use chain override or fetch from network
       const gasPrice = chain.gasPriceWei ?? await publicClient.getGasPrice();
 
-      // Approve tokens to be spent by the pool
-      const approveHash = await walletClient.writeContract({
-        address: debtAsset.address as `0x${string}`,
-        abi: ERC20_ABI,
-        functionName: 'approve',
-        args: [chain.aaveContracts.pool as `0x${string}`, debtToCover],
-        gasPrice,
-      });
-
-      console.log(`[${chain.name}] Approval transaction sent: ${approveHash}`);
-      await publicClient.waitForTransactionReceipt({ hash: approveHash });
-      console.log(`[${chain.name}] Approval confirmed`);
-
       // Check gas price against maximum
       const networkGasPrice = await publicClient.getGasPrice();
       const effectiveGasPrice = chain.gasPriceWei ?? networkGasPrice;
@@ -276,10 +314,10 @@ export class Liquidator {
       // Execute liquidation
       const gasLimit = BigInt(Math.floor(500000 * (chain.strategy?.gasLimitBuffer || 1.2)));
 
-      const txHash = await walletClient.writeContract({
-        address: chain.aaveContracts.pool as `0x${string}`,
-        abi: AAVE_POOL_ABI,
-        functionName: 'liquidationCall',
+      const simulation = await publicClient.simulateContract({
+        address: chain.vaultAddress as `0x${string}`,
+        abi: VAULT_ABI,
+        functionName: 'liquidate',
         args: [
           collateralAsset.address as `0x${string}`,
           debtAsset.address as `0x${string}`,
@@ -287,6 +325,15 @@ export class Liquidator {
           debtToCover,
           false,
         ],
+        gas: gasLimit,
+        gasPrice,
+        account: walletClient.account,
+      });
+
+      const collateralReceived = simulation.result as bigint;
+
+      const txHash = await walletClient.writeContract({
+        ...simulation.request,
         gas: gasLimit,
         gasPrice: effectiveGasPrice,
       });
@@ -305,11 +352,8 @@ export class Liquidator {
           `[${chain.name}] ✅ Liquidation successful! Tx hash: ${receipt.transactionHash}`
         );
 
-        // Check received collateral
-        const collateralBalance = await this.checkBalance(chain, collateralAsset.address);
-
         console.log(
-          `[${chain.name}] Received collateral: ${formatUnits(collateralBalance, collateralAsset.decimals)} ${collateralAsset.symbol}`
+          `[${chain.name}] Received collateral: ${formatUnits(collateralReceived, collateralAsset.decimals)} ${collateralAsset.symbol}`
         );
 
         return {
@@ -317,6 +361,7 @@ export class Liquidator {
           transactionHash: receipt.transactionHash,
           gasUsed,
           gasCostWei,
+          profitAmount: collateralReceived,
           timestamp: Date.now(),
           chainId: chain.chainId,
         };

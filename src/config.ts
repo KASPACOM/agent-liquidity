@@ -81,7 +81,7 @@ export const CONFIG = {
       gasPriceWei: 2_000_000_000_001n, // 2 twei + 1 — Galleon requires strictly > 2 twei
 
       // DEX contracts
-      vaultAddress: process.env.IGRA_VAULT_ADDRESS || '0xa3ED9723EbCb88916b1f80c3988A13a49cd372E5',
+      vaultAddress: process.env.IGRA_VAULT_ADDRESS || '0xB62859622189711D90C6679e713Cbc3ad5a78576', // AgentVault V3 — supports liquidation, PnL tracking
       routerAddress: process.env.IGRA_DEX_ROUTER || '0x47F80b6D7071B7738D6DD9d973D7515ce753e9d9',
       factoryAddress: process.env.IGRA_DEX_FACTORY || '0xc61aeAdA8888A0e9FF5709A8386c8527CD5065d0',
       wkasAddress: '0x394C68684F9AFCEb9b804531EF07a864E8081738',
