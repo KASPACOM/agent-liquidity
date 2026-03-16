@@ -53,6 +53,7 @@ export interface LiquidationProfitCalculation {
   debtAsset: Asset;
   collateralAsset: Asset;
   debtToCover: bigint;
+  estimatedDebtToCover: bigint;
   collateralToReceive: bigint;
   liquidationBonus: number;
   estimatedProfitUsd: number;
