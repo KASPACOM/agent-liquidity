@@ -16,6 +16,8 @@ import {
 } from './types';
 
 
+const MAX_UINT256 = 2n ** 256n - 1n;
+
 export class Liquidator {
   private walletClients: Map<number, any> = new Map();
   private publicClients: Map<number, any> = new Map();
@@ -82,19 +84,24 @@ export class Liquidator {
       const closeFactorHfThreshold = parseUnits('0.95', 18);
       const closeFactorMultiplier = target.healthFactor < closeFactorHfThreshold ? 10000n : 5000n;
 
-      const maxDebtToCover = (debtAsset.amount * closeFactorMultiplier) / 10000n;
-
-      // Use a smaller amount to be safe (e.g., 95% of max)
-      const debtToCover = (maxDebtToCover * 95n) / 100n;
+      // When HF < 0.95, Aave allows 100% close factor. Pass uint256.max to avoid
+      // MustNotLeaveDust() revert — Aave will cap it to the full debt automatically.
+      // When HF >= 0.95 (50% close factor), use 95% of half to stay safely under the limit.
+      const isFullLiquidation = closeFactorMultiplier === 10000n;
+      const estimatedDebtToCover = isFullLiquidation
+        ? debtAsset.amount
+        : (debtAsset.amount * closeFactorMultiplier * 95n) / (10000n * 100n);
+      // For the actual contract call: use MAX_UINT256 for full liquidations to avoid dust revert
+      const debtToCover = isFullLiquidation ? MAX_UINT256 : estimatedDebtToCover;
 
       // Get liquidation bonus
       const liquidationBonus = collateralAsset.liquidationBonus || 1.05;
 
-      // Calculate collateral to receive
+      // Calculate collateral to receive (use estimatedDebtToCover for accurate math)
       // Formula: (debtAssetPrice * debtToCover * 10^collateralDecimals * liquidationBonus) / (collateralAssetPrice * 10^debtDecimals)
       const collateralToReceive =
         (debtAssetPrice.aaveOraclePrice *
-          debtToCover *
+          estimatedDebtToCover *
           BigInt(10 ** collateralAsset.decimals) *
           BigInt(Math.floor(liquidationBonus * 10000))) /
         (collateralAssetPrice.aaveOraclePrice *
@@ -103,7 +110,7 @@ export class Liquidator {
 
       // Calculate USD values
       const debtAmountUsd =
-        parseFloat(formatUnits(debtToCover, debtAsset.decimals)) *
+        parseFloat(formatUnits(estimatedDebtToCover, debtAsset.decimals)) *
         parseFloat(formatUnits(debtAssetPrice.aaveOraclePrice, 8));
 
       const collateralAmountUsd =
@@ -147,6 +154,7 @@ export class Liquidator {
         debtAsset,
         collateralAsset,
         debtToCover,
+        estimatedDebtToCover,
         collateralToReceive,
         liquidationBonus,
         estimatedProfitUsd: grossProfitUsd,
@@ -247,7 +255,7 @@ export class Liquidator {
     }
 
     try {
-      const { target, debtAsset, collateralAsset, debtToCover } = calculation;
+      const { target, debtAsset, collateralAsset, debtToCover, estimatedDebtToCover } = calculation;
 
       const walletClient = this.walletClients.get(chain.chainId);
       const publicClient = this.publicClients.get(chain.chainId);
@@ -263,9 +271,9 @@ export class Liquidator {
       // Check if we have enough balance
       const debtTokenBalance = await this.checkVaultBalance(chain, debtAsset.address);
 
-      if (debtTokenBalance < debtToCover) {
+      if (debtTokenBalance < estimatedDebtToCover) {
         const balanceFormatted = formatUnits(debtTokenBalance, debtAsset.decimals);
-        const neededFormatted = formatUnits(debtToCover, debtAsset.decimals);
+        const neededFormatted = formatUnits(estimatedDebtToCover, debtAsset.decimals);
 
         console.error(
           `[${chain.name}] Insufficient balance for direct liquidation. ` +
@@ -285,7 +293,7 @@ export class Liquidator {
           `  User: ${target.user}\n` +
           `  Debt Asset: ${debtAsset.symbol}\n` +
           `  Collateral Asset: ${collateralAsset.symbol}\n` +
-          `  Debt to Cover: ${formatUnits(debtToCover, debtAsset.decimals)}\n` +
+          `  Debt to Cover: ${debtToCover === MAX_UINT256 ? `MAX (≈${formatUnits(estimatedDebtToCover, debtAsset.decimals)})` : formatUnits(debtToCover, debtAsset.decimals)}\n` +
           `  Expected Profit: $${calculation.netProfitUsd.toFixed(2)}`
       );
 
