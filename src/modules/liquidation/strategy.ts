@@ -300,12 +300,14 @@ export class StrategyManager {
       let successCount = 0;
       for (const opportunity of opportunities) {
         // Re-check balance before each execution (previous liquidation may have spent tokens)
+        // Use estimatedDebtToCover (actual debt amount) not debtToCover (which may be MAX_UINT256 for full liquidations)
         const currentBalance = await this.liquidator.checkVaultBalance(chain, opportunity.debtAsset.address);
-        if (currentBalance < opportunity.debtToCover) {
+        const requiredBalance = opportunity.estimatedDebtToCover ?? opportunity.debtToCover;
+        if (currentBalance < requiredBalance) {
           console.log(
             `[${chain.name}] Skipping ${opportunity.target.user} — insufficient ${opportunity.debtAsset.symbol} ` +
               `(have: ${formatUnits(currentBalance, opportunity.debtAsset.decimals)}, ` +
-              `need: ${formatUnits(opportunity.debtToCover, opportunity.debtAsset.decimals)})`
+              `need: ${formatUnits(requiredBalance, opportunity.debtAsset.decimals)})`
           );
           continue;
         }
