@@ -2,9 +2,15 @@
  * Health Factor Monitor for Aave V3
  * Ported from ethers v5 to viem
  */
-import { createPublicClient, http, PublicClient, parseUnits, formatUnits } from 'viem';
+import { createPublicClient, http, PublicClient, parseUnits } from 'viem';
 import { AAVE_POOL_ABI, ERC20_ABI } from '../../contracts/abis';
 import { ChainConfig, UserAccountData, LiquidationTarget, Asset } from './types';
+import {
+  getUserAccountDataViaKaskadWrapper,
+  hasKaskadReadWrapper,
+  isKaskadConfigured,
+  KaskadEnclaveClient,
+} from './kaskad';
 
 /**
  * Retry wrapper for RPC calls with exponential backoff.
@@ -82,6 +88,7 @@ export class HealthFactorMonitor {
   private reservesData: Map<string, any> = new Map();
   private tokenSymbols: Map<string, string> = new Map();
   private tokenDecimals: Map<string, number> = new Map();
+  private kaskadEnclaveClient = new KaskadEnclaveClient();
 
   constructor(chain: ChainConfig) {
     this.chain = chain;
@@ -112,6 +119,15 @@ export class HealthFactorMonitor {
       ) as string[];
 
       console.log(`[${this.chain.name}] Loaded ${this.reservesList.length} reserves`);
+
+      if (isKaskadConfigured(this.chain)) {
+        if (!hasKaskadReadWrapper(this.chain)) {
+          throw new Error(
+            `[${this.chain.name}] Kaskad is configured but poolAddressesProvider, uiDataProviderWrapper, or enclaveApiUrl is missing; refusing stale direct health reads`,
+          );
+        }
+        console.log(`[${this.chain.name}] Kaskad health reads enabled via UiDataProviderWrapper`);
+      }
 
       // Pre-fetch reserve configuration data and token info
       for (const asset of this.reservesList) {
@@ -195,6 +211,19 @@ export class HealthFactorMonitor {
     }
 
     try {
+      if (isKaskadConfigured(this.chain)) {
+        return await retryRpc(
+          () => getUserAccountDataViaKaskadWrapper(
+            this.client,
+            this.chain,
+            userAddress,
+            this.kaskadEnclaveClient,
+          ),
+          `Kaskad wrapper getUserAccountData(${userAddress.slice(0, 10)}...)`,
+          1,
+        );
+      }
+
       const data = await retryRpc(
         () => this.client.readContract({
           address: this.chain.aaveContracts!.pool as `0x${string}`,
