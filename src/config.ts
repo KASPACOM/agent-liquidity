@@ -37,7 +37,16 @@ export interface ChainConfig {
     pool: string;
     poolDataProvider: string;
     oracle: string;
+    poolAddressesProvider?: string;
   } | null;
+
+  // Kaskad oracle integration (Aave markets that require signed price updates)
+  kaskad?: {
+    priceOracle?: string;
+    router?: string;
+    uiDataProviderWrapper?: string;
+    enclaveApiUrl?: string;
+  };
 
   // Strategy config for liquidations (only used if Aave exists)
   strategy?: {
@@ -97,6 +106,13 @@ export const CONFIG = {
         pool: '0xb265EA393A9297472628E21575AE5c7E6458A1F2',
         poolDataProvider: '0xc6b4592171EC79192f838E4050a2453D4D71fBAe',
         oracle: '0x5B83681E48f365cfD2A4Ee29E2B699e38e04EbD9',
+        poolAddressesProvider: '0x4f6110740149a550eE89B21Bc81893CB2B56f39f',
+      },
+      kaskad: {
+        priceOracle: process.env.IGRA_KASKAD_PRICE_ORACLE || '0x869764619f0eDA0076Ece6eec2C3509ce01717E1',
+        router: process.env.IGRA_KASKAD_ROUTER || '0x7F5712A982e09b4CE43f2B98d8ffE43Db61214aF',
+        uiDataProviderWrapper: process.env.IGRA_UI_DATA_PROVIDER_WRAPPER || '0x7b7E99Bd96b99d47B72B08866c1cD16c678E5372',
+        enclaveApiUrl: process.env.IGRA_KASKAD_ENCLAVE_API_URL || 'https://oracle.kaskad.live',
       },
 
       // Liquidation strategy

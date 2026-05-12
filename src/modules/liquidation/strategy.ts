@@ -12,6 +12,7 @@ import {
   ExecutionResult,
 } from './types';
 import { SubgraphClient, QUERIES } from '../subgraph';
+import { getKaskadVaultLiquidationUnsupportedError } from './kaskad';
 
 /** How often to refresh borrower addresses (every N cycles = N * 30s). */
 const BORROWER_REFRESH_INTERVAL = 10; // ~5 minutes
@@ -198,6 +199,12 @@ export class StrategyManager {
    */
   private async assessPosition(chain: ChainConfig, target: LiquidationTarget): Promise<void> {
     try {
+      const kaskadUnsupportedError = getKaskadVaultLiquidationUnsupportedError(chain);
+      if (kaskadUnsupportedError) {
+        console.warn(`[${chain.name}] Skipping liquidation assessment for ${target.user}: ${kaskadUnsupportedError}`);
+        return;
+      }
+
       // Iterate through all debt assets and check profitability with each collateral asset
       for (const debtAsset of target.debtAssets) {
         // Check if we have balance for this debt asset
@@ -240,6 +247,12 @@ export class StrategyManager {
    */
   private async executeStrategy(chain: ChainConfig): Promise<void> {
     try {
+      const kaskadUnsupportedError = getKaskadVaultLiquidationUnsupportedError(chain);
+      if (kaskadUnsupportedError) {
+        console.warn(`[${chain.name}] Skipping liquidation execution: ${kaskadUnsupportedError}`);
+        return;
+      }
+
       // Check cooldown period
       const now = Date.now();
       const lastExecution = this.lastExecutionTime.get(chain.chainId) || 0;

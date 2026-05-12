@@ -14,6 +14,7 @@ import {
   LiquidationProfitCalculation,
   ExecutionResult,
 } from './types';
+import { getKaskadVaultLiquidationUnsupportedError } from './kaskad';
 
 
 const MAX_UINT256 = 2n ** 256n - 1n;
@@ -255,6 +256,17 @@ export class Liquidator {
     }
 
     try {
+      const kaskadUnsupportedError = getKaskadVaultLiquidationUnsupportedError(chain);
+      if (kaskadUnsupportedError) {
+        console.error(`[${chain.name}] ${kaskadUnsupportedError}`);
+        return {
+          success: false,
+          error: kaskadUnsupportedError,
+          timestamp: Date.now(),
+          chainId: chain.chainId,
+        };
+      }
+
       const { target, debtAsset, collateralAsset, debtToCover, estimatedDebtToCover } = calculation;
 
       const walletClient = this.walletClients.get(chain.chainId);
